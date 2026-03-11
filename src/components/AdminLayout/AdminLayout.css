@@ -1,0 +1,29 @@
+.adminLayout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: inherit;
+}
+
+.adminLayout__body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.adminLayout__main {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .adminLayout__body {
+    grid-template-columns: 280px 1fr;
+    align-items: start;
+  }
+
+  .adminLayout__main {
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+}
+

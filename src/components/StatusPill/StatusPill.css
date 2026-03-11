@@ -1,0 +1,37 @@
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statusPill--ok {
+  color: rgba(25, 195, 125, 0.98);
+  background: rgba(25, 195, 125, 0.12);
+  border-color: rgba(25, 195, 125, 0.28);
+}
+
+.statusPill--warn {
+  color: rgba(244, 163, 0, 0.95);
+  background: rgba(244, 163, 0, 0.12);
+  border-color: rgba(244, 163, 0, 0.26);
+}
+
+.statusPill--bad {
+  color: rgba(255, 77, 79, 0.96);
+  background: rgba(255, 77, 79, 0.12);
+  border-color: rgba(255, 77, 79, 0.26);
+}
+
+.statusPill--muted {
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+

@@ -2,6 +2,11 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard/Dashboard.jsx';
 import LoginScreen from '../pages/Login/LoginScreen.jsx';
 import { useAuth } from '../hooks/useAuth.js';
+import AdminLayout from '../components/AdminLayout/AdminLayout.jsx';
+import MatchOdds from '../pages/Markets/MatchOdds/MatchOdds.jsx';
+import TossMarket from '../pages/Markets/TossMarket/TossMarket.jsx';
+import BackLay from '../pages/Markets/BackLay/BackLay.jsx';
+import Settlement from '../pages/Settlement/Settlement.jsx';
 
 const PrivateRoute = () => {
   const { isAuthenticated } = useAuth();
@@ -23,7 +28,13 @@ const AppRoutes = () => {
       </Route>
 
       <Route element={<PrivateRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/markets/match-odds" element={<MatchOdds />} />
+          <Route path="/markets/toss" element={<TossMarket />} />
+          <Route path="/markets/back-lay" element={<BackLay />} />
+          <Route path="/settlement" element={<Settlement />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -5,12 +5,18 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: transparent;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 a {
@@ -24,10 +30,23 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  display: block;
+  background: #071a17;
+}
+
+/* App layout should fill the viewport */
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout > main {
+  flex: 1;
+  min-width: 0;
+  background: inherit;
 }
 
 h1 {
@@ -58,6 +77,9 @@ button:focus-visible {
   :root {
     color: #213547;
     background-color: #ffffff;
+  }
+  body {
+    background: #ffffff;
   }
   a:hover {
     color: #747bff;
