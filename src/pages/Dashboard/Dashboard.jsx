@@ -107,7 +107,7 @@ const Dashboard = () => {
             <button
               type="button"
               className="quick__item"
-              onClick={() => navigate(`/markets/match-odds?sport=${sport}`)}
+              onClick={() => navigate(`/markets?sport=${sport}`)}
             >
               <span className="quick__icon">🎯</span>
               <span className="quick__text">

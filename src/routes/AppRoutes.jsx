@@ -30,7 +30,7 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route element={<AdminLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/markets/match-odds" element={<MatchOdds />} />
+          <Route path="/markets" element={<MatchOdds />} />
           <Route path="/markets/toss" element={<TossMarket />} />
           <Route path="/markets/back-lay" element={<BackLay />} />
           <Route path="/settlement" element={<Settlement />} />

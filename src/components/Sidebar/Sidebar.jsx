@@ -16,26 +16,26 @@ const Sidebar = () => {
 
             <div className="sidebar__groupLabel">Sports</div>
 
-            <NavLink className="sidebar__link" to="/markets/match-odds?sport=cricket">
+            <NavLink className="sidebar__link" to="/markets?sport=cricket">
               <span className="sidebar__icon">🏏</span>
               <span>Cricket</span>
             </NavLink>
 
-            <NavLink className="sidebar__link" to="/markets/match-odds?sport=soccer">
+            <NavLink className="sidebar__link" to="/markets?sport=soccer">
               <span className="sidebar__icon">⚽</span>
               <span>Soccer</span>
             </NavLink>
 
-            <NavLink className="sidebar__link" to="/markets/match-odds?sport=tennis">
+            <NavLink className="sidebar__link" to="/markets?sport=tennis">
               <span className="sidebar__icon">🎾</span>
               <span>Tennis</span>
             </NavLink>
 
             {/* <div className="sidebar__groupLabel">Markets</div>
 
-            <NavLink className="sidebar__link" to="/markets/match-odds">
+            <NavLink className="sidebar__link" to="/markets">
               <span className="sidebar__icon">🎯</span>
-              <span>Match Odds</span>
+              <span>Markets</span>
             </NavLink>
 
             <NavLink className="sidebar__link" to="/markets/toss">

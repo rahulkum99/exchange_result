@@ -16,13 +16,13 @@ const Footer = () => {
           <NavLink className="appFooter__link" to="/dashboard">
             Dashboard
           </NavLink>
-          <NavLink className="appFooter__link" to="/markets/match-odds?sport=cricket">
+          <NavLink className="appFooter__link" to="/markets?sport=cricket">
             Cricket
           </NavLink>
-          <NavLink className="appFooter__link" to="/markets/match-odds?sport=soccer">
+          <NavLink className="appFooter__link" to="/markets?sport=soccer">
             Soccer
           </NavLink>
-          <NavLink className="appFooter__link" to="/markets/match-odds?sport=tennis">
+          <NavLink className="appFooter__link" to="/markets?sport=tennis">
             Tennis
           </NavLink>
         </nav>

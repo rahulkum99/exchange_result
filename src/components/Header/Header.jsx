@@ -143,7 +143,7 @@ const Header = () => {
               className="sideMenu__item"
               onClick={() => {
                 setMenuOpen(false);
-                navigate('/markets/match-odds?sport=cricket');
+                navigate('/markets?sport=cricket');
               }}
               disabled={!isAuthenticated}
             >
@@ -159,7 +159,7 @@ const Header = () => {
               className="sideMenu__item"
               onClick={() => {
                 setMenuOpen(false);
-                navigate('/markets/match-odds?sport=soccer');
+                navigate('/markets?sport=soccer');
               }}
               disabled={!isAuthenticated}
             >
@@ -175,7 +175,7 @@ const Header = () => {
               className="sideMenu__item"
               onClick={() => {
                 setMenuOpen(false);
-                navigate('/markets/match-odds?sport=tennis');
+                navigate('/markets?sport=tennis');
               }}
               disabled={!isAuthenticated}
             >

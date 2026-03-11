@@ -48,8 +48,8 @@ const MatchOdds = () => {
     <div className="market">
       <div className="market__top">
         <div>
-          <h2 className="market__title">Match Odds</h2>
-          <p className="market__sub">Choose a sport and manage matches/markets</p>
+          <h2 className="market__title">Markets</h2>
+          <p className="market__sub">Choose a sport and view market details</p>
         </div>
 
         <div className="market__sports" role="tablist" aria-label="Sports">
