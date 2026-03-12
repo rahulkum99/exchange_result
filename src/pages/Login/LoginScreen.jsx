@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import './LoginScreen.css';
 import { useNavigate } from 'react-router-dom';
-
-// NOTE:
-// The original snippet used Redux (`useDispatch`, `setCredentials`)
-// and RTK Query (`useLoginMutation`). Those are not yet set up
-// in this project, so this version only handles UI and basic
-// navigation. You can wire real auth logic later.
+import { useDispatch } from 'react-redux';
+import { useLoginMutation } from '../../features/auth/authAPI';
+import { setCredentials, storeRefreshToken } from '../../features/auth/authSlice';
 
 function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [username, setUsername] = useState('superadmin');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const togglePassword = () => {
@@ -22,24 +21,33 @@ function LoginScreen() {
   const handleLogin = async () => {
     setError('');
 
-    // Placeholder login behavior:
-    // Replace this with your real API + Redux logic when ready.
     if (!username || !password) {
       setError('Please enter username and password.');
       return;
     }
 
     try {
-      // Fake delay to mimic API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const result = await login({ username, password }).unwrap();
 
-      // Store a fake token so private routes see the user as "logged in"
-      localStorage.setItem('access_token', 'demo-token');
+      if (result?.tokens?.accessToken) {
+        dispatch(
+          setCredentials({
+            user: result.user,
+            accessToken: result.tokens.accessToken,
+          }),
+        );
+
+        storeRefreshToken(result.tokens.refreshToken);
+      }
 
       navigate('/dashboard');
     } catch (err) {
-      console.error('Login failed', err);
-      setError('Login failed. Please check your credentials.');
+      // RTK Query error shape: err.data?.message or generic message
+      const message =
+        err?.data?.message ||
+        err?.error ||
+        'Login failed. Please check your credentials.';
+      setError(message);
     }
   };
 
@@ -94,9 +102,9 @@ function LoginScreen() {
         <button
           className="login-btn primary"
           onClick={handleLogin}
-          disabled={false}
+          disabled={isLoading}
         >
-          Login
+          {isLoading ? 'Logging in...' : 'Login'}
         </button>
       </div>
     </div>
