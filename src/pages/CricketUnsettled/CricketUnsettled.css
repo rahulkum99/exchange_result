@@ -1,0 +1,225 @@
+.cricket-page {
+  margin: 0 auto;
+  padding: 1rem 0 3.5rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #111827;
+}
+
+.cricket-page__header {
+  padding: 0 1rem 0.75rem;
+}
+
+.cricket-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cricket-page__content {
+  background-color: #ffffff;
+  border-top: 2px solid #d1a21f;
+  padding: 0.75rem 0 0;
+}
+
+.cricket-page__state {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.cricket-page__state--error {
+  color: #b91c1c;
+}
+
+.cricket-page__toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem 0.6rem;
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.cricket-page__toggle-label {
+  font-size: 0.9rem;
+}
+
+.cricket-page__toggle-switch {
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid #facc15;
+  background: linear-gradient(90deg, #f59e0b, #facc15);
+}
+
+.cricket-page__list {
+  padding: 0.2rem 0 0;
+}
+
+.cricket-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.cricket-card {
+  display: flex;
+  justify-content: space-between;
+  background-color: #f5f5dc;
+  margin: 0 0.75rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid #d4d4aa;
+  cursor: pointer;
+}
+
+.cricket-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  color: #111827;
+}
+
+.cricket-card__date {
+  opacity: 0.8;
+}
+
+.cricket-card__status {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background-color: #111827;
+  color: #f9fafb;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.cricket-card__match {
+  padding: 0.4rem 0.75rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cricket-card__segments {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  text-align: center;
+  background-color: #d9d29c;
+  width: 50%;
+}
+
+.cricket-card__segment {
+  padding: 0.4rem 0.3rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.cricket-card__segment:last-child {
+  border-right: none;
+}
+
+.cricket-card__segment-label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.1rem;
+}
+
+.cricket-card__segment-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .cricket-page {
+
+    padding-inline: 0;
+  }
+  .cricket-card {
+    flex-direction: column;
+  }
+  .cricket-card__segments {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    text-align: center;
+    background-color: #d9d29c;
+    width: 100%;
+  }
+  
+}
+
+@media (max-width: 640px) {
+  .cricket-page {
+    padding-inline: 0;
+  }
+
+  .cricket-page__title {
+    font-size: 1.35rem;
+  }
+}
+
+.cricket-event__header {
+  padding: 0.6rem 1rem 0.4rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cricket-event__match {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.cricket-event__date {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.cricket-event__markets {
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.cricket-event__market-card {
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.cricket-event__market-header {
+  padding: 0.45rem 0.6rem;
+  background-color: #f9fafb;
+}
+
+.cricket-event__market-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.cricket-event__market-meta {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.cricket-event__table {
+  width: 100%;
+}
+
+.cricket-event__table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.cricket-event__table-row--head {
+  background-color: #111827;
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+.cricket-event__table-row:not(.cricket-event__table-row--head):nth-child(even) {
+  background-color: #f9fafb;
+}
+

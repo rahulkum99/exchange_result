@@ -3,7 +3,11 @@ import './LoginScreen.css';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useLoginMutation } from '../../features/auth/authAPI';
-import { setCredentials, storeRefreshToken } from '../../features/auth/authSlice';
+import {
+  setCredentials,
+  storeRefreshToken,
+  storeAccessToken,
+} from '../../features/auth/authSlice';
 
 function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -38,6 +42,7 @@ function LoginScreen() {
         );
 
         storeRefreshToken(result.tokens.refreshToken);
+        storeAccessToken(result.tokens.accessToken);
       }
 
       navigate('/dashboard');

@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const REFRESH_TOKEN_KEY = 'refresh_token';
+const ACCESS_TOKEN_KEY = 'access_token';
 
 const initialState = {
   user: null,
@@ -49,6 +50,14 @@ export const getStoredRefreshToken = () => {
   }
 };
 
+export const getStoredAccessToken = () => {
+  try {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
 export const storeRefreshToken = (token) => {
   try {
     if (token) {
@@ -59,9 +68,27 @@ export const storeRefreshToken = (token) => {
   }
 };
 
+export const storeAccessToken = (token) => {
+  try {
+    if (token) {
+      localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    }
+  } catch {
+    // ignore storage errors
+  }
+};
+
 export const clearRefreshToken = () => {
   try {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch {
+    // ignore storage errors
+  }
+};
+
+export const clearAccessToken = () => {
+  try {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
   } catch {
     // ignore storage errors
   }

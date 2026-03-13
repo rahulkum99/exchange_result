@@ -6,10 +6,12 @@ import {
   getStoredRefreshToken,
   storeRefreshToken,
   clearRefreshToken,
+  storeAccessToken,
+  clearAccessToken,
 } from './authSlice';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'http://localhost:5000/api',
+  baseUrl: import.meta.env.VITE_API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     const token = selectAccessToken(getState());
     if (token) {
@@ -28,6 +30,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     if (!refreshToken) {
       api.dispatch(logout());
       clearRefreshToken();
+      clearAccessToken();
       return result;
     }
 
@@ -50,11 +53,13 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       );
 
       storeRefreshToken(refreshResult.data.tokens.refreshToken);
+      storeAccessToken(refreshResult.data.tokens.accessToken);
 
       result = await baseQuery(args, api, extraOptions);
     } else {
       api.dispatch(logout());
       clearRefreshToken();
+      clearAccessToken();
     }
   }
 

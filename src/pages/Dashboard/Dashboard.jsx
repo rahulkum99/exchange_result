@@ -1,156 +1,140 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import Navbar from '../../components/Navbar';
 import './Dashboard.css';
-import StatusPill from '../../components/StatusPill/StatusPill.jsx';
-import { SPORTS } from '../../services/mock/mockData.js';
-import { getMarketCounts } from '../../services/mock/mockApi.js';
-import { useMockStore } from '../../services/mock/useMockStore.js';
+import { useGetCricketUnsettledSummaryQuery } from '../../features/cricket/cricketAPI';
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const { matches, markets } = useMockStore((s) => ({ matches: s.matches, markets: s.markets }));
-  const [sport, setSport] = useState('cricket');
+function Dashboard() {
+  const { data, isLoading, isError } = useGetCricketUnsettledSummaryQuery();
 
-  const list = useMemo(() => {
-    const ms = matches.filter((m) => m.sport === sport);
-    return ms.map((m) => ({
-      ...m,
-      counts: getMarketCounts(m.id),
-      oddsMarket: markets.find((mk) => mk.matchId === m.id && mk.type === 'matchOdds') || null,
-    }));
-  }, [matches, markets, sport]);
+  const events = data?.data || [];
 
-  const activity = useMemo(
-    () => [
-      { title: 'Market resumed', meta: 'Match Odds · 6 mins ago', tag: 'Market' },
-      { title: 'Settlement queued', meta: 'Cricket · 18 mins ago', tag: 'Settlement' },
-      { title: 'Odds updated', meta: 'Back/Lay · 31 mins ago', tag: 'Market' },
-    ],
-    []
+  const totalMarkets = events.reduce(
+    (sum, event) => sum + (event.markets ? event.markets.length : 0),
+    0,
   );
+
+  const totalUnsettledBets = events.reduce((sum, event) => {
+    if (!event.markets) return sum;
+    return (
+      sum +
+      event.markets.reduce(
+        (inner, market) => inner + (market.totalOpenBets || 0),
+        0,
+      )
+    );
+  }, 0);
 
   return (
-    <div className="dash">
-      <div className="dash__top">
-        <div>
-          <h2 className="dash__title">Dashboard</h2>
-          <p className="dash__subtitle">Sports overview and live matches</p>
-        </div>
+    <>
+      <Navbar />
+      <main className="dashboard">
+        <header className="dashboard__header">
+          <div>
+            <h1 className="dashboard__title">Overview</h1>
+            <p className="dashboard__subtitle">
+              {isLoading && 'Loading cricket unsettled summary...'}
+              {isError && 'Could not load data. Please try again.'}
+              {!isLoading &&
+                !isError &&
+                'Live snapshot of all sports markets and unsettled positions.'}
+            </p>
+          </div>
 
-        <div className="dashSports" role="tablist" aria-label="Sports">
-          {SPORTS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              className={sport === s ? 'dashSportBtn dashSportBtn--active' : 'dashSportBtn'}
-              onClick={() => setSport(s)}
-              role="tab"
-              aria-selected={sport === s}
-            >
-              {s === 'cricket' ? 'Cricket' : s === 'soccer' ? 'Soccer' : 'Tennis'}
-            </button>
-          ))}
-        </div>
-      </div>
+          <div className="dashboard__header-actions">
+            <select className="dashboard__select">
+              <option>All sports</option>
+              <option>Cricket</option>
+              <option>Soccer</option>
+              <option>Tennis</option>
+            </select>
+            <button className="dashboard__refresh">Refresh</button>
+          </div>
+        </header>
 
-      <section className="dashMatches">
-        {list.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            className="dashMatch"
-            onClick={() => navigate(`/markets/match-odds?sport=${sport}`)}
-          >
-            <div className="dashMatch__row">
-              <div className="dashMatch__time">{m.startTime}</div>
-              <StatusPill value={m.status} />
+        <section className="dashboard__grid">
+          <article className="dashboard__card">
+            <h2 className="dashboard__card-label">Open Markets</h2>
+            <p className="dashboard__card-value">
+              {isLoading ? '—' : totalMarkets}
+            </p>
+            <p className="dashboard__card-meta">Cricket unsettled markets</p>
+          </article>
+          <article className="dashboard__card">
+            <h2 className="dashboard__card-label">Unsettled Bets</h2>
+            <p className="dashboard__card-value">
+              {isLoading ? '—' : totalUnsettledBets}
+            </p>
+            <p className="dashboard__card-meta dashboard__card-meta--warning">
+              {isLoading ? 'Loading...' : 'Total open positions'}
+            </p>
+          </article>
+          <article className="dashboard__card">
+            <h2 className="dashboard__card-label">Exposure</h2>
+            <p className="dashboard__card-value">₹ 4,52,300</p>
+            <p className="dashboard__card-meta">Estimated risk</p>
+          </article>
+        </section>
+
+        <section className="dashboard__table-card">
+          <header className="dashboard__table-header">
+            <div>
+              <h2 className="dashboard__table-title">Cricket unsettled events</h2>
+              <p className="dashboard__table-subtitle">
+                Quick view of the latest markets being traded.
+              </p>
             </div>
+            <button className="dashboard__link-button">View all</button>
+          </header>
 
-            <div className="dashMatch__name">{m.name}</div>
-
-            <div className="dashMatch__tabs">
-              <span className="dashMatch__tab">
-                <strong>All</strong> <span>({m.counts.all})</span>
-              </span>
-              <span className="dashMatch__tab">
-                <strong>Odds</strong> <span>({m.counts.odds})</span>
-              </span>
-              <span className="dashMatch__tab">
-                <strong>Fancy</strong> <span>({m.counts.fancy})</span>
-              </span>
-            </div>
-
-            {m.oddsMarket && (
-              <div className="dashMatch__odds">
-                <span className="dashMiniLabel">Market</span>
-                <span className="dashMiniValue">
-                  <StatusPill value={m.oddsMarket.status} />
-                </span>
-                <span className="dashMiniLabel">Updated</span>
-                <span className="dashMiniValue">
-                  {new Date(m.oddsMarket.updatedAt).toLocaleTimeString()}
-                </span>
+            <div className="dashboard__table">
+              <div className="dashboard__table-row dashboard__table-row--head">
+                <span>Sport</span>
+                <span>Event</span>
+                <span>Markets</span>
+                <span>Unsettled bets</span>
+                <span>Market names</span>
               </div>
-            )}
-          </button>
-        ))}
-      </section>
 
-      <section className="dash__two">
-        <article className="panel">
-          <div className="panel__head">
-            <h3 className="panel__title">Quick actions</h3>
-            <span className="panel__meta">Navigation</span>
-          </div>
-
-          <div className="quick">
-            <button
-              type="button"
-              className="quick__item"
-              onClick={() => navigate(`/markets?sport=${sport}`)}
-            >
-              <span className="quick__icon">🎯</span>
-              <span className="quick__text">
-                <strong>Open Match Odds</strong>
-                <span>{sport.toUpperCase()} markets</span>
-              </span>
-            </button>
-            <button
-              type="button"
-              className="quick__item"
-              onClick={() => navigate('/settlement')}
-            >
-              <span className="quick__icon">✅</span>
-              <span className="quick__text">
-                <strong>Settlement</strong>
-                <span>Queue and finalize</span>
-              </span>
-            </button>
-          </div>
-        </article>
-
-        <article className="panel">
-          <div className="panel__head">
-            <h3 className="panel__title">Recent activity</h3>
-            <span className="panel__meta">Last 24 hours</span>
-          </div>
-
-          <ul className="activity">
-            {activity.map((a) => (
-              <li key={`${a.title}-${a.meta}`} className="activity__item">
-                <div className="activity__main">
-                  <div className="activity__title">{a.title}</div>
-                  <div className="activity__meta">{a.meta}</div>
+              {isLoading && (
+                <div className="dashboard__table-row">
+                  <span colSpan={5}>Loading...</span>
                 </div>
-                <span className="tag">{a.tag}</span>
-              </li>
-            ))}
-          </ul>
-        </article>
-      </section>
-    </div>
+              )}
+
+              {!isLoading &&
+                !isError &&
+                events.slice(0, 10).map((event) => {
+                  const markets = event.markets || [];
+                  const unsettledForEvent = markets.reduce(
+                    (sum, market) => sum + (market.totalOpenBets || 0),
+                    0,
+                  );
+                  const marketNames = markets
+                    .map((market) => market.marketName)
+                    .filter(Boolean)
+                    .join(', ');
+
+                  return (
+                    <div className="dashboard__table-row" key={event.eventId}>
+                      <span>Cricket</span>
+                      <span>{event.eventName}</span>
+                      <span>{markets.length}</span>
+                      <span>{unsettledForEvent}</span>
+                      <span>{marketNames || '—'}</span>
+                    </div>
+                  );
+                })}
+
+              {!isLoading && isError && (
+                <div className="dashboard__table-row">
+                  <span colSpan={5}>Failed to load cricket data.</span>
+                </div>
+              )}
+            </div>
+        </section>
+      </main>
+    </>
   );
-};
+}
 
 export default Dashboard;
-

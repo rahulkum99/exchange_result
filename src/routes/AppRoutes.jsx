@@ -1,12 +1,11 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard/Dashboard.jsx';
 import LoginScreen from '../pages/Login/LoginScreen.jsx';
+import CricketUnsettled from '../pages/CricketUnsettled/CricketUnsettled.jsx';
+import CricketUnsettledEvent from '../pages/CricketUnsettled/CricketUnsettledEvent.jsx';
+import SoccerUnsettled from '../pages/SoccerUnsettled/SoccerUnsettled.jsx';
+import TennisUnsettled from '../pages/TennisUnsettled/TennisUnsettled.jsx';
 import { useAuth } from '../hooks/useAuth.js';
-import AdminLayout from '../components/AdminLayout/AdminLayout.jsx';
-import MatchOdds from '../pages/Markets/MatchOdds/MatchOdds.jsx';
-import TossMarket from '../pages/Markets/TossMarket/TossMarket.jsx';
-import BackLay from '../pages/Markets/BackLay/BackLay.jsx';
-import Settlement from '../pages/Settlement/Settlement.jsx';
 
 const PrivateRoute = () => {
   const { isAuthenticated } = useAuth();
@@ -28,13 +27,14 @@ const AppRoutes = () => {
       </Route>
 
       <Route element={<PrivateRoute />}>
-        <Route element={<AdminLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/markets" element={<MatchOdds />} />
-          <Route path="/markets/toss" element={<TossMarket />} />
-          <Route path="/markets/back-lay" element={<BackLay />} />
-          <Route path="/settlement" element={<Settlement />} />
-        </Route>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/cricket/unsettled" element={<CricketUnsettled />} />
+        <Route
+          path="/cricket/event/:eventId"
+          element={<CricketUnsettledEvent />}
+        />
+        <Route path="/soccer" element={<SoccerUnsettled />} />
+        <Route path="/tennis" element={<TennisUnsettled />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -43,4 +43,3 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
-
