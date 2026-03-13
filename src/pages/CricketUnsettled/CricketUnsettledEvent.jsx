@@ -38,6 +38,28 @@ function CricketUnsettledEvent() {
                 </div>
               </div>
 
+              <div className="cricket-event__auto-settle">
+                <div className="cricket-event__auto-title">
+                  "{eventName.split('/')[0]?.trim()}" Match Auto Settle
+                </div>
+                <button type="button" className="cricket-event__auto-toggle">
+                  <span className="cricket-event__auto-toggle-label">On</span>
+                  <span className="cricket-event__auto-toggle-knob" />
+                </button>
+              </div>
+
+              <div className="cricket-event__actions">
+                <button type="button" className="cricket-event__btn">
+                  Get Missing Fancy
+                </button>
+                <button type="button" className="cricket-event__btn">
+                  Unsettled Bets
+                </button>
+                <button type="button" className="cricket-event__btn">
+                  Refresh
+                </button>
+              </div>
+
               <div className="cricket-event__markets">
                 {markets.map((market) => (
                   <div
@@ -46,33 +68,40 @@ function CricketUnsettledEvent() {
                   >
                     <div className="cricket-event__market-header">
                       <span className="cricket-event__market-name">
-                        {market.marketName}
-                      </span>
-                      <span className="cricket-event__market-meta">
-                        Open bets: {market.openBets} • Stake: {market.totalStake} •
-                        Exposure: {market.totalExposure}
+                        "{eventName.split('/')[0]?.trim()}" {market.marketName}
                       </span>
                     </div>
 
                     <div className="cricket-event__table">
                       <div className="cricket-event__table-row cricket-event__table-row--head">
-                        <span>Selection</span>
-                        <span>Open bets</span>
-                        <span>Stake</span>
-                        <span>Exposure</span>
+                        <span>S.No.</span>
+                        <span>Result</span>
+                        <span>Action</span>
                       </div>
 
-                      {market.selections?.map((sel) => (
-                        <div
-                          className="cricket-event__table-row"
-                          key={sel.selectionId}
-                        >
-                          <span>{sel.selectionName}</span>
-                          <span>{sel.openBets}</span>
-                          <span>{sel.totalStake}</span>
-                          <span>{sel.totalExposure}</span>
-                        </div>
-                      ))}
+                      <div className="cricket-event__table-row">
+                        <span>1</span>
+                        <span>
+                          <select className="cricket-event__select">
+                            {market.selections?.map((sel) => (
+                              <option
+                                key={sel.selectionId}
+                                value={sel.selectionId}
+                              >
+                                {sel.selectionName}
+                              </option>
+                            ))}
+                          </select>
+                        </span>
+                        <span>
+                          <button
+                            type="button"
+                            className="cricket-event__save-btn"
+                          >
+                            Save
+                          </button>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
