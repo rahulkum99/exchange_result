@@ -17,11 +17,33 @@ export const cricketApi = createApi({
         method: 'GET',
       }),
     }),
+    settleMatchOdds: builder.mutation({
+      query: ({
+        marketType,
+        eventId,
+        marketId,
+        winnerSelectionId,
+        winnerSelectionName,
+        marketName,
+      }) => ({
+        url: '/cricket/settle/match-odds',
+        method: 'POST',
+        body: {
+          marketType,
+          eventId,
+          marketId,
+          winnerSelectionId,
+          winnerSelectionName,
+          marketName,
+        },
+      }),
+    }),
   }),
 });
 
 export const {
   useGetUnsettledSummaryQuery: useGetCricketUnsettledSummaryQuery,
   useGetUnsettledEventQuery: useGetCricketUnsettledEventQuery,
+  useSettleMatchOddsMutation,
 } = cricketApi;
 
