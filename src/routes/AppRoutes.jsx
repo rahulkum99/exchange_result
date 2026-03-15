@@ -4,7 +4,9 @@ import LoginScreen from '../pages/Login/LoginScreen.jsx';
 import CricketUnsettled from '../pages/CricketUnsettled/CricketUnsettled.jsx';
 import CricketUnsettledEvent from '../pages/CricketUnsettled/CricketUnsettledEvent.jsx';
 import SoccerUnsettled from '../pages/SoccerUnsettled/SoccerUnsettled.jsx';
+import SoccerUnsettledEvent from '../pages/SoccerUnsettled/SoccerUnsettledEvent.jsx';
 import TennisUnsettled from '../pages/TennisUnsettled/TennisUnsettled.jsx';
+import TennisUnsettledEvent from '../pages/TennisUnsettled/TennisUnsettledEvent.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 
 const PrivateRoute = () => {
@@ -34,7 +36,9 @@ const AppRoutes = () => {
           element={<CricketUnsettledEvent />}
         />
         <Route path="/soccer" element={<SoccerUnsettled />} />
+        <Route path="/soccer/event/:eventId" element={<SoccerUnsettledEvent />} />
         <Route path="/tennis" element={<TennisUnsettled />} />
+        <Route path="/tennis/event/:eventId" element={<TennisUnsettledEvent />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

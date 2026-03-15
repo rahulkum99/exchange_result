@@ -1,133 +1,104 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import './CricketUnsettled.css';
+import '../CricketUnsettled/CricketUnsettled.css';
 import {
-  useGetCricketUnsettledEventQuery,
-  useSetEventOpenMutation,
-  useGetMissingFancyMutation,
-  useGetUnsettledBetsMutation,
-  useSettleMatchOddsMutation,
-} from '../../features/cricket/cricketAPI';
+  useGetTennisUnsettledEventQuery,
+  useSetTennisEventOpenMutation,
+  useSetTennisSettleMatchOddsMutation,
+} from '../../features/tennis/tennisAPI';
 
-function CricketUnsettledEvent() {
+function TennisUnsettledEvent() {
   const { eventId } = useParams();
-  const { data, isLoading, isError, refetch, isFetching } = useGetCricketUnsettledEventQuery(eventId);
+  const { data, isLoading, isError, refetch, isFetching } = useGetTennisUnsettledEventQuery(eventId);
   const markets = data?.data || [];
 
-  const eventName = markets[0]?.eventName || '';
+  const eventName = markets[0]?.eventName || data?.eventName || `Event ${eventId}`;
+  const getMarketName = (market) =>
+    market.marketName || `Market ${market.marketId}`;
 
-   const [selectedByMarket, setSelectedByMarket] = React.useState({});
-   const [exchangeReportModal, setExchangeReportModal] = React.useState(null);
-   const [savingMarketId, setSavingMarketId] = React.useState(null);
-   const [openEvent, setOpenEvent] = React.useState(true);
-   const [setEventOpen] = useSetEventOpenMutation();
-   const [getMissingFancy, { isLoading: isMissingFancyLoading }] = useGetMissingFancyMutation();
-   const [getUnsettledBets, { isLoading: isUnsettledBetsLoading }] = useGetUnsettledBetsMutation();
-   const [settleMatchOdds] = useSettleMatchOddsMutation();
+  const [selectedByMarket, setSelectedByMarket] = React.useState({});
+  const [exchangeReportModal, setExchangeReportModal] = React.useState(null);
+  const [savingMarketId, setSavingMarketId] = React.useState(null);
+  const [openEvent, setOpenEvent] = React.useState(true);
+  const [setEventOpen] = useSetTennisEventOpenMutation();
+  const [settleMatchOdds] = useSetTennisSettleMatchOddsMutation();
 
-   const handleGetMissingFancy = async () => {
-     try {
-       await getMissingFancy(eventId).unwrap();
-       await refetch();
-       alert('Missing fancy data updated.');
-     } catch (err) {
-       alert('Failed to get missing fancy. Please try again.');
-       console.error(err);
-     }
-   };
+  const handleSelectionChange = (marketId, selectionId) => {
+    setSelectedByMarket((prev) => ({
+      ...prev,
+      [marketId]: selectionId,
+    }));
+  };
 
-   const handleUnsettledBets = async () => {
-     try {
-       await getUnsettledBets(eventId).unwrap();
-       await refetch();
-       alert('Unsettled bets updated.');
-     } catch (err) {
-       alert('Failed to fetch unsettled bets. Please try again.');
-       console.error(err);
-     }
-   };
+  const handleSave = async (market) => {
+    const winnerSelectionId =
+      selectedByMarket[market.marketId] || market.selections?.[0]?.selectionId;
 
-   const handleRefresh = () => {
-     refetch();
-   };
+    if (!winnerSelectionId) return;
 
-   const handleSelectionChange = (marketId, selectionId) => {
-     setSelectedByMarket((prev) => ({
-       ...prev,
-       [marketId]: selectionId,
-     }));
-   };
+    setSavingMarketId(market.marketId);
+    const winnerSelectionName =
+      market.selections?.find((s) => s.selectionId === winnerSelectionId)
+        ?.selectionName || '';
 
-   const handleSave = async (market) => {
-     const winnerSelectionId =
-       selectedByMarket[market.marketId] || market.selections?.[0]?.selectionId;
+    try {
+      const result = await settleMatchOdds({
+        marketType: 'match_odds',
+        eventId,
+        marketId: market.marketId,
+        winnerSelectionId,
+        winnerSelectionName,
+        marketName: market.marketName || 'MATCH_ODDS',
+      }).unwrap();
 
-     if (!winnerSelectionId) return;
+      const message =
+        result?.data?.[0]?.data?.message ??
+        (result?.success ? 'Market settled successfully.' : 'Settlement failed.');
+      alert(message);
+      await refetch();
+    } catch (error) {
+      alert('Failed to settle match odds. Please try again.');
+      console.error('Settle match odds error', error);
+    } finally {
+      setSavingMarketId(null);
+    }
+  };
 
-     setSavingMarketId(market.marketId);
-     const winnerSelectionName =
-       market.selections?.find((s) => s.selectionId === winnerSelectionId)
-         ?.selectionName || '';
+  const handleShowExchangeReport = (market) => {
+    const reports = market.exchange_report || [];
+    if (!reports.length) return;
+    setExchangeReportModal({
+      marketName: market.marketName || getMarketName(market),
+      reports,
+    });
+  };
 
-     try {
-       const result = await settleMatchOdds({
-         marketType: 'match_odds',
-         eventId,
-         marketId: market.marketId,
-         winnerSelectionId,
-         winnerSelectionName,
-         marketName: market.marketName,
-       }).unwrap();
+  React.useEffect(() => {
+    if (markets.length > 0 && markets[0].inplay != null) {
+      setOpenEvent(Boolean(markets[0].inplay));
+    }
+  }, [markets]);
 
-       const message =
-         result?.data?.[0]?.data?.message ??
-         (result?.success ? 'Market settled successfully.' : 'Settlement failed.');
-       // eslint-disable-next-line no-alert
-       alert(message);
-       await refetch();
-     } catch (error) {
-       // eslint-disable-next-line no-alert
-       alert('Failed to settle match odds. Please try again.');
-       // eslint-disable-next-line no-console
-       console.error('Settle match odds error', error);
-     } finally {
-       setSavingMarketId(null);
-     }
-   };
+  const handleAutoToggle = async () => {
+    const next = !openEvent;
+    try {
+      await setEventOpen({ eventId, openEvent: next }).unwrap();
+      setOpenEvent(next);
+    } catch (err) {
+      alert('Failed to update auto settle. Please try again.');
+      console.error(err);
+    }
+  };
 
-   const handleShowExchangeReport = (market) => {
-     const reports = market.exchange_report || [];
-     if (!reports.length) return;
-     setExchangeReportModal({ marketName: market.marketName, reports });
-   };
-
-   React.useEffect(() => {
-     if (markets.length > 0 && markets[0].inplay != null) {
-       setOpenEvent(Boolean(markets[0].inplay));
-     }
-   }, [markets]);
-
-   const handleAutoToggle = async () => {
-     const next = !openEvent;
-     try {
-       await setEventOpen({ eventId, openEvent: next }).unwrap();
-       setOpenEvent(next);
-     } catch (err) {
-       // eslint-disable-next-line no-alert
-       alert('Failed to update auto settle. Please try again.');
-       console.error(err);
-     }
-   };
-
-   React.useEffect(() => {
-     if (!exchangeReportModal) return;
-     const onEscape = (e) => {
-       if (e.key === 'Escape') setExchangeReportModal(null);
-     };
-     document.addEventListener('keydown', onEscape);
-     return () => document.removeEventListener('keydown', onEscape);
-   }, [exchangeReportModal]);
+  React.useEffect(() => {
+    if (!exchangeReportModal) return;
+    const onEscape = (e) => {
+      if (e.key === 'Escape') setExchangeReportModal(null);
+    };
+    document.addEventListener('keydown', onEscape);
+    return () => document.removeEventListener('keydown', onEscape);
+  }, [exchangeReportModal]);
 
   return (
     <>
@@ -174,7 +145,7 @@ function CricketUnsettledEvent() {
       <Navbar />
       <main className="cricket-page">
         <header className="cricket-page__header">
-          <h1 className="cricket-page__title">Cricket</h1>
+          <h1 className="cricket-page__title">Tennis</h1>
         </header>
 
         <section className="cricket-page__content">
@@ -189,16 +160,16 @@ function CricketUnsettledEvent() {
             <>
               <div className="cricket-event__header">
                 <div className="cricket-event__match">
-                  {eventName.split('/')[0]?.trim()}
+                  {eventName.includes('/') ? eventName.split('/')[0]?.trim() : eventName}
                 </div>
                 <div className="cricket-event__date">
-                  {eventName.split('/')[1]?.trim()}
+                  {eventName.includes('/') ? eventName.split('/')[1]?.trim() : ''}
                 </div>
               </div>
 
               <div className="cricket-event__auto-settle">
                 <div className="cricket-event__auto-title">
-                  "{eventName.split('/')[0]?.trim()}" Match Auto Settle
+                  &quot;{eventName.includes('/') ? eventName.split('/')[0]?.trim() : eventName}&quot; Match Auto Settle
                 </div>
                 <button
                   type="button"
@@ -216,23 +187,7 @@ function CricketUnsettledEvent() {
                 <button
                   type="button"
                   className="cricket-event__btn"
-                  onClick={handleGetMissingFancy}
-                  disabled={isMissingFancyLoading}
-                >
-                  {isMissingFancyLoading ? 'Loading...' : 'Get Missing Fancy'}
-                </button>
-                <button
-                  type="button"
-                  className="cricket-event__btn"
-                  onClick={handleUnsettledBets}
-                  disabled={isUnsettledBetsLoading}
-                >
-                  {isUnsettledBetsLoading ? 'Loading...' : 'Unsettled Bets'}
-                </button>
-                <button
-                  type="button"
-                  className="cricket-event__btn"
-                  onClick={handleRefresh}
+                  onClick={() => refetch()}
                   disabled={isFetching}
                 >
                   {isFetching ? 'Refreshing...' : 'Refresh'}
@@ -240,6 +195,11 @@ function CricketUnsettledEvent() {
               </div>
 
               <div className="cricket-event__markets">
+                {markets.length === 0 && (
+                  <div className="cricket-page__state">
+                    No markets for this event.
+                  </div>
+                )}
                 {markets.map((market) => (
                   <div
                     key={market.marketId}
@@ -247,7 +207,7 @@ function CricketUnsettledEvent() {
                   >
                     <div className="cricket-event__market-header">
                       <span className="cricket-event__market-name">
-                        "{eventName.split('/')[0]?.trim()}" {market.marketName}
+                        &quot;{eventName.includes('/') ? eventName.split('/')[0]?.trim() : eventName}&quot; {getMarketName(market)}
                       </span>
                     </div>
 
@@ -327,5 +287,4 @@ function CricketUnsettledEvent() {
   );
 }
 
-export default CricketUnsettledEvent;
-
+export default TennisUnsettledEvent;

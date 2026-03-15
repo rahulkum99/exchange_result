@@ -7,12 +7,76 @@
 
 .cricket-page__header {
   padding: 0 1rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .cricket-page__title {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+}
+
+.cricket-page__header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cricket-page__filter-btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cricket-page__filter-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.cricket-page__filter-btn--active {
+  border-color: #d1a21f;
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.cricket-page__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  flex-wrap: wrap;
+}
+
+.cricket-page__pagination-btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cricket-page__pagination-btn:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.cricket-page__pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cricket-page__pagination-info {
+  font-size: 0.85rem;
+  color: #6b7280;
 }
 
 .cricket-page__content {
@@ -235,6 +299,16 @@
   height: 18px;
   border-radius: 999px;
   background-color: #f9fafb;
+}
+
+.cricket-event__auto-toggle--off {
+  border-color: #9ca3af;
+  background: #6b7280;
+  color: #f9fafb;
+}
+
+.cricket-event__auto-toggle--off .cricket-event__auto-toggle-knob {
+  background-color: #e5e7eb;
 }
 
 .cricket-event__actions {

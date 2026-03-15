@@ -1,11 +1,31 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import '../CricketUnsettled/CricketUnsettled.css';
 import { useGetSoccerUnsettledSummaryQuery } from '../../features/soccer/soccerAPI';
 
+const DEFAULT_LIMIT = 20;
+
 function SoccerUnsettled() {
-  const { data, isLoading, isError } = useGetSoccerUnsettledSummaryQuery();
+  const [openEventFilter, setOpenEventFilter] = React.useState(undefined);
+  const [page, setPage] = React.useState(1);
+  const [limit] = React.useState(DEFAULT_LIMIT);
+
+  const { data, isLoading, isError } = useGetSoccerUnsettledSummaryQuery({
+    page,
+    limit,
+    openEvent: openEventFilter,
+  });
+
   const events = data?.data || [];
+  const total = data?.total ?? 0;
+  const currentPage = data?.page ?? page;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  const setOpenEventFilterAndResetPage = (value) => {
+    setOpenEventFilter(value);
+    setPage(1);
+  };
 
   return (
     <>
@@ -13,6 +33,22 @@ function SoccerUnsettled() {
       <main className="cricket-page">
         <header className="cricket-page__header">
           <h1 className="cricket-page__title">Soccer</h1>
+          <div className="cricket-page__header-actions">
+            <button
+              type="button"
+              className={`cricket-page__filter-btn ${openEventFilter === true ? 'cricket-page__filter-btn--active' : ''}`}
+              onClick={() => setOpenEventFilterAndResetPage(openEventFilter === true ? undefined : true)}
+            >
+              Open event
+            </button>
+            <button
+              type="button"
+              className={`cricket-page__filter-btn ${openEventFilter === false ? 'cricket-page__filter-btn--active' : ''}`}
+              onClick={() => setOpenEventFilterAndResetPage(openEventFilter === false ? undefined : false)}
+            >
+              Close event
+            </button>
+          </div>
         </header>
 
         <section className="cricket-page__content">
@@ -25,11 +61,6 @@ function SoccerUnsettled() {
 
           {!isLoading && !isError && (
             <>
-              <div className="cricket-page__toggle-row">
-                <span className="cricket-page__toggle-label">On</span>
-                <button className="cricket-page__toggle-switch" />
-              </div>
-
               <div className="cricket-page__list">
                 {events.map((event) => {
                   const markets = event.markets || [];
@@ -48,7 +79,12 @@ function SoccerUnsettled() {
                       ?.totalOpenBets || 0;
 
                   return (
-                    <article className="cricket-card" key={event.eventId}>
+                    <Link
+                      to={`/soccer/event/${event.eventId}`}
+                      className="cricket-card-link"
+                      key={event.eventId}
+                    >
+                      <article className="cricket-card">
                       <div>
                         <div className="cricket-card__top">
                           <div className="cricket-card__date">
@@ -92,9 +128,35 @@ function SoccerUnsettled() {
                         </div>
                       </div>
                     </article>
+                    </Link>
                   );
                 })}
               </div>
+
+              {totalPages > 1 && (
+                <div className="cricket-page__pagination">
+                  <button
+                    type="button"
+                    className="cricket-page__pagination-btn"
+                    disabled={currentPage <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <span className="cricket-page__pagination-info">
+                    Page {currentPage} of {totalPages}
+                    {total > 0 && ` (${total} total)`}
+                  </span>
+                  <button
+                    type="button"
+                    className="cricket-page__pagination-btn"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </>
           )}
         </section>
