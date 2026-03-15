@@ -33,14 +33,18 @@ function TennisUnsettledEvent() {
 
   const handleSave = async (market) => {
     const winnerSelectionId =
-      selectedByMarket[market.marketId] || market.selections?.[0]?.selectionId;
+      selectedByMarket[market.marketId] ||
+      market.section?.[0]?.sid ||
+      market.selections?.[0]?.selectionId;
 
     if (!winnerSelectionId) return;
 
     setSavingMarketId(market.marketId);
     const winnerSelectionName =
+      market.section?.find((s) => s.sid === winnerSelectionId)?.nat ||
       market.selections?.find((s) => s.selectionId === winnerSelectionId)
-        ?.selectionName || '';
+        ?.selectionName ||
+      '';
 
     try {
       const result = await settleMatchOdds({
@@ -226,6 +230,7 @@ function TennisUnsettledEvent() {
                             disabled={market.settled}
                             value={
                               selectedByMarket[market.marketId] ||
+                              market.section?.[0]?.sid ||
                               market.selections?.[0]?.selectionId ||
                               ''
                             }
@@ -233,14 +238,20 @@ function TennisUnsettledEvent() {
                               handleSelectionChange(market.marketId, e.target.value)
                             }
                           >
-                            {market.selections?.map((sel) => (
-                              <option
-                                key={sel.selectionId}
-                                value={sel.selectionId}
-                              >
-                                {sel.selectionName}
-                              </option>
-                            ))}
+                            {market.section && market.section.length > 0
+                              ? market.section.map((sec) => (
+                                  <option key={sec.sid} value={sec.sid}>
+                                    {sec.nat}
+                                  </option>
+                                ))
+                              : market.selections?.map((sel) => (
+                                  <option
+                                    key={sel.selectionId}
+                                    value={sel.selectionId}
+                                  >
+                                    {sel.selectionName}
+                                  </option>
+                                ))}
                           </select>
                         </span>
                         <span>

@@ -3,10 +3,28 @@ import { createSlice } from '@reduxjs/toolkit';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const ACCESS_TOKEN_KEY = 'access_token';
 
+export const getStoredRefreshToken = () => {
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+export const getStoredAccessToken = () => {
+  try {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const hydratedAccessToken = getStoredAccessToken();
+
 const initialState = {
   user: null,
-  accessToken: null,
-  status: 'idle',
+  accessToken: hydratedAccessToken,
+  status: hydratedAccessToken ? 'authenticated' : 'idle',
   error: null,
 };
 
@@ -41,22 +59,6 @@ export const selectAccessToken = (state) => state.auth?.accessToken;
 export const selectIsAuthenticated = (state) => Boolean(state.auth?.accessToken);
 export const selectAuthStatus = (state) => state.auth?.status;
 export const selectAuthError = (state) => state.auth?.error;
-
-export const getStoredRefreshToken = () => {
-  try {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-};
-
-export const getStoredAccessToken = () => {
-  try {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-};
 
 export const storeRefreshToken = (token) => {
   try {

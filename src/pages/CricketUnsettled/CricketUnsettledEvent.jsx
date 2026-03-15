@@ -6,7 +6,6 @@ import {
   useGetCricketUnsettledEventQuery,
   useSetEventOpenMutation,
   useGetMissingFancyMutation,
-  useGetUnsettledBetsMutation,
   useSettleMatchOddsMutation,
 } from '../../features/cricket/cricketAPI';
 
@@ -15,16 +14,21 @@ function CricketUnsettledEvent() {
   const { data, isLoading, isError, refetch, isFetching } = useGetCricketUnsettledEventQuery(eventId);
   const markets = data?.data || [];
 
-  const eventName = markets[0]?.eventName || '';
+  const [selectedByMarket, setSelectedByMarket] = React.useState({});
+  const [exchangeReportModal, setExchangeReportModal] = React.useState(null);
+  const [savingMarketId, setSavingMarketId] = React.useState(null);
+  const [openEvent, setOpenEvent] = React.useState(true);
+  const [showUnsettledOnly, setShowUnsettledOnly] = React.useState(false);
+  const [setEventOpen] = useSetEventOpenMutation();
+  const [getMissingFancy, { isLoading: isMissingFancyLoading }] = useGetMissingFancyMutation();
+  const [settleMatchOdds] = useSettleMatchOddsMutation();
 
-   const [selectedByMarket, setSelectedByMarket] = React.useState({});
-   const [exchangeReportModal, setExchangeReportModal] = React.useState(null);
-   const [savingMarketId, setSavingMarketId] = React.useState(null);
-   const [openEvent, setOpenEvent] = React.useState(true);
-   const [setEventOpen] = useSetEventOpenMutation();
-   const [getMissingFancy, { isLoading: isMissingFancyLoading }] = useGetMissingFancyMutation();
-   const [getUnsettledBets, { isLoading: isUnsettledBetsLoading }] = useGetUnsettledBetsMutation();
-   const [settleMatchOdds] = useSettleMatchOddsMutation();
+  const visibleMarkets = React.useMemo(
+    () => (showUnsettledOnly ? markets.filter((m) => m.settled === false) : markets),
+    [markets, showUnsettledOnly],
+  );
+
+  const eventName = markets[0]?.eventName || '';
 
    const handleGetMissingFancy = async () => {
      try {
@@ -37,16 +41,9 @@ function CricketUnsettledEvent() {
      }
    };
 
-   const handleUnsettledBets = async () => {
-     try {
-       await getUnsettledBets(eventId).unwrap();
-       await refetch();
-       alert('Unsettled bets updated.');
-     } catch (err) {
-       alert('Failed to fetch unsettled bets. Please try again.');
-       console.error(err);
-     }
-   };
+  const handleToggleUnsettledFilter = () => {
+    setShowUnsettledOnly((prev) => !prev);
+  };
 
    const handleRefresh = () => {
      refetch();
@@ -60,15 +57,19 @@ function CricketUnsettledEvent() {
    };
 
    const handleSave = async (market) => {
-     const winnerSelectionId =
-       selectedByMarket[market.marketId] || market.selections?.[0]?.selectionId;
+    const winnerSelectionId =
+      selectedByMarket[market.marketId] ||
+      market.section?.[0]?.sid ||
+      market.selections?.[0]?.selectionId;
 
      if (!winnerSelectionId) return;
 
      setSavingMarketId(market.marketId);
-     const winnerSelectionName =
-       market.selections?.find((s) => s.selectionId === winnerSelectionId)
-         ?.selectionName || '';
+    const winnerSelectionName =
+      market.section?.find((s) => s.sid === winnerSelectionId)?.nat ||
+      market.selections?.find((s) => s.selectionId === winnerSelectionId)
+        ?.selectionName ||
+      '';
 
      try {
        const result = await settleMatchOdds({
@@ -223,11 +224,10 @@ function CricketUnsettledEvent() {
                 </button>
                 <button
                   type="button"
-                  className="cricket-event__btn"
-                  onClick={handleUnsettledBets}
-                  disabled={isUnsettledBetsLoading}
+                  className={`cricket-event__btn ${showUnsettledOnly ? 'cricket-event__btn--active' : ''}`}
+                  onClick={handleToggleUnsettledFilter}
                 >
-                  {isUnsettledBetsLoading ? 'Loading...' : 'Unsettled Bets'}
+                  {showUnsettledOnly ? 'Show All Bets' : 'Show Unsettled Bets'}
                 </button>
                 <button
                   type="button"
@@ -240,7 +240,7 @@ function CricketUnsettledEvent() {
               </div>
 
               <div className="cricket-event__markets">
-                {markets.map((market) => (
+                {visibleMarkets.map((market) => (
                   <div
                     key={market.marketId}
                     className="cricket-event__market-card"
@@ -266,21 +266,28 @@ function CricketUnsettledEvent() {
                             disabled={market.settled}
                             value={
                               selectedByMarket[market.marketId] ||
+                              market.section?.[0]?.sid ||
                               market.selections?.[0]?.selectionId ||
                               ''
                             }
                             onChange={(e) =>
                               handleSelectionChange(market.marketId, e.target.value)
                             }
-                          >
-                            {market.selections?.map((sel) => (
-                              <option
-                                key={sel.selectionId}
-                                value={sel.selectionId}
-                              >
-                                {sel.selectionName}
-                              </option>
-                            ))}
+                            >
+                            {market.section && market.section.length > 0
+                              ? market.section.map((sec) => (
+                                  <option key={sec.sid} value={sec.sid}>
+                                    {sec.nat}
+                                  </option>
+                                ))
+                              : market.selections?.map((sel) => (
+                                  <option
+                                    key={sel.selectionId}
+                                    value={sel.selectionId}
+                                  >
+                                    {sel.selectionName}
+                                  </option>
+                                ))}
                           </select>
                         </span>
                         <span>
