@@ -7,6 +7,8 @@ import {
   useSetEventOpenMutation,
   useGetMissingFancyMutation,
   useSettleMatchOddsMutation,
+  useSettleTosMarketMutation,
+  useSettleBookmakerFancyMutation,
 } from '../../features/cricket/cricketAPI';
 
 function CricketUnsettledEvent() {
@@ -22,113 +24,145 @@ function CricketUnsettledEvent() {
   const [setEventOpen] = useSetEventOpenMutation();
   const [getMissingFancy, { isLoading: isMissingFancyLoading }] = useGetMissingFancyMutation();
   const [settleMatchOdds] = useSettleMatchOddsMutation();
+  const [settleTosMarket] = useSettleTosMarketMutation();
+  const [settleBookmakerFancy] = useSettleBookmakerFancyMutation();
 
   const visibleMarkets = React.useMemo(
     () => (showUnsettledOnly ? markets.filter((m) => m.settled === false) : markets),
     [markets, showUnsettledOnly],
   );
 
+  const visibleSettleableMarkets = React.useMemo(
+    () =>
+      visibleMarkets.filter((m) =>
+        ['Match Odds', 'Bookmaker','MATCH_ODDS','BOOKMAKER','fancy1'].includes(m.marketName),
+      ),
+    [visibleMarkets],
+  );
+
   const eventName = markets[0]?.eventName || '';
 
-   const handleGetMissingFancy = async () => {
-     try {
-       await getMissingFancy(eventId).unwrap();
-       await refetch();
-       alert('Missing fancy data updated.');
-     } catch (err) {
-       alert('Failed to get missing fancy. Please try again.');
-       console.error(err);
-     }
-   };
+  const handleGetMissingFancy = async () => {
+    try {
+      await getMissingFancy(eventId).unwrap();
+      await refetch();
+      alert('Missing fancy data updated.');
+    } catch (err) {
+      alert('Failed to get missing fancy. Please try again.');
+      console.error(err);
+    }
+  };
 
   const handleToggleUnsettledFilter = () => {
     setShowUnsettledOnly((prev) => !prev);
   };
 
-   const handleRefresh = () => {
-     refetch();
-   };
+  const handleRefresh = () => {
+    refetch();
+  };
 
-   const handleSelectionChange = (marketId, selectionId) => {
-     setSelectedByMarket((prev) => ({
-       ...prev,
-       [marketId]: selectionId,
-     }));
-   };
+  const handleSelectionChange = (marketId, selectionId) => {
+    setSelectedByMarket((prev) => ({
+      ...prev,
+      [marketId]: selectionId,
+    }));
+  };
 
-   const handleSave = async (market) => {
+  const handleSave = async (market) => {
     const winnerSelectionId =
       selectedByMarket[market.marketId] ||
       market.section?.[0]?.sid ||
       market.selections?.[0]?.selectionId;
 
-     if (!winnerSelectionId) return;
+    if (!winnerSelectionId) return;
 
-     setSavingMarketId(market.marketId);
+    setSavingMarketId(market.marketId);
     const winnerSelectionName =
       market.section?.find((s) => s.sid === winnerSelectionId)?.nat ||
       market.selections?.find((s) => s.selectionId === winnerSelectionId)
         ?.selectionName ||
       '';
 
-     try {
-       const result = await settleMatchOdds({
-         marketType: 'match_odds',
-         eventId,
-         marketId: market.marketId,
-         winnerSelectionId,
-         winnerSelectionName,
-         marketName: market.marketName,
-       }).unwrap();
+    try {
+      let result;
 
-       const message =
-         result?.data?.[0]?.data?.message ??
-         (result?.success ? 'Market settled successfully.' : 'Settlement failed.');
-       // eslint-disable-next-line no-alert
-       alert(message);
-       await refetch();
-     } catch (error) {
-       // eslint-disable-next-line no-alert
-       alert('Failed to settle match odds. Please try again.');
-       // eslint-disable-next-line no-console
-       console.error('Settle match odds error', error);
-     } finally {
-       setSavingMarketId(null);
-     }
-   };
+      if (market.marketName === 'fancy1') {
+        result = await settleTosMarket({
+          marketType: 'tos_market',
+          eventId,
+          marketId: market.marketId,
+          winnerSelectionId,
+        }).unwrap();
+      } else if (market.marketName === 'Bookmaker') {
+        result = await settleBookmakerFancy({
+          marketType: 'bookmakers_fancy',
+          eventId,
+          marketId: market.marketId,
+          winnerSelectionId,
+        }).unwrap();
+      } else {
+        result = await settleMatchOdds({
+          marketType: 'match_odds',
+          eventId,
+          marketId: market.marketId,
+          winnerSelectionId,
+          winnerSelectionName,
+          marketName: market.marketName,
+        }).unwrap();
+      }
 
-   const handleShowExchangeReport = (market) => {
-     const reports = market.exchange_report || [];
-     if (!reports.length) return;
-     setExchangeReportModal({ marketName: market.marketName, reports });
-   };
+      const message =
+        result?.data?.[0]?.data?.message ??
+        (result?.success
+          ? market.marketName === 'Bookmaker'
+            ? 'Bookmaker market settled successfully.'
+            : 'Market settled successfully.'
+          : 'Settlement failed.');
+      // eslint-disable-next-line no-alert
+      alert(message);
+      await refetch();
+    } catch (error) {
+      // eslint-disable-next-line no-alert
+      alert('Failed to settle market. Please try again.');
+      // eslint-disable-next-line no-console
+      console.error('Settle market error', error);
+    } finally {
+      setSavingMarketId(null);
+    }
+  };
 
-   React.useEffect(() => {
-     if (markets.length > 0 && markets[0].inplay != null) {
-       setOpenEvent(Boolean(markets[0].inplay));
-     }
-   }, [markets]);
+  const handleShowExchangeReport = (market) => {
+    const reports = market.exchange_report || [];
+    if (!reports.length) return;
+    setExchangeReportModal({ marketName: market.marketName, reports });
+  };
 
-   const handleAutoToggle = async () => {
-     const next = !openEvent;
-     try {
-       await setEventOpen({ eventId, openEvent: next }).unwrap();
-       setOpenEvent(next);
-     } catch (err) {
-       // eslint-disable-next-line no-alert
-       alert('Failed to update auto settle. Please try again.');
-       console.error(err);
-     }
-   };
+  React.useEffect(() => {
+    if (markets.length > 0 && markets[0].inplay != null) {
+      setOpenEvent(Boolean(markets[0].inplay));
+    }
+  }, [markets]);
 
-   React.useEffect(() => {
-     if (!exchangeReportModal) return;
-     const onEscape = (e) => {
-       if (e.key === 'Escape') setExchangeReportModal(null);
-     };
-     document.addEventListener('keydown', onEscape);
-     return () => document.removeEventListener('keydown', onEscape);
-   }, [exchangeReportModal]);
+  const handleAutoToggle = async () => {
+    const next = !openEvent;
+    try {
+      await setEventOpen({ eventId, openEvent: next }).unwrap();
+      setOpenEvent(next);
+    } catch (err) {
+      // eslint-disable-next-line no-alert
+      alert('Failed to update auto settle. Please try again.');
+      console.error(err);
+    }
+  };
+
+  React.useEffect(() => {
+    if (!exchangeReportModal) return;
+    const onEscape = (e) => {
+      if (e.key === 'Escape') setExchangeReportModal(null);
+    };
+    document.addEventListener('keydown', onEscape);
+    return () => document.removeEventListener('keydown', onEscape);
+  }, [exchangeReportModal]);
 
   return (
     <>
@@ -240,7 +274,7 @@ function CricketUnsettledEvent() {
               </div>
 
               <div className="cricket-event__markets">
-                {visibleMarkets.map((market) => (
+                {visibleSettleableMarkets.map((market) => (
                   <div
                     key={market.marketId}
                     className="cricket-event__market-card"
@@ -273,21 +307,21 @@ function CricketUnsettledEvent() {
                             onChange={(e) =>
                               handleSelectionChange(market.marketId, e.target.value)
                             }
-                            >
+                          >
                             {market.section && market.section.length > 0
                               ? market.section.map((sec) => (
-                                  <option key={sec.sid} value={sec.sid}>
-                                    {sec.nat}
-                                  </option>
-                                ))
+                                <option key={sec.sid} value={sec.sid}>
+                                  {sec.nat}
+                                </option>
+                              ))
                               : market.selections?.map((sel) => (
-                                  <option
-                                    key={sel.selectionId}
-                                    value={sel.selectionId}
-                                  >
-                                    {sel.selectionName}
-                                  </option>
-                                ))}
+                                <option
+                                  key={sel.selectionId}
+                                  value={sel.selectionId}
+                                >
+                                  {sel.selectionName}
+                                </option>
+                              ))}
                           </select>
                         </span>
                         <span>
@@ -326,6 +360,143 @@ function CricketUnsettledEvent() {
                   </div>
                 ))}
               </div>
+
+              <section className="cricket-event__manual-result">
+                <div className="cricket-event__manual-header">
+                  <h2 className="cricket-event__manual-title">Manual Result Entry</h2>
+                  <p className="cricket-event__manual-subtitle">
+                    Use this section to manually record a final result when required by operations.
+                  </p>
+                </div>
+
+                <div className="cricket-event__market-card cricket-event__market-card--full">
+                  <div className="cricket-event__table-scroll">
+                    <table className="cricket-event__table cricket-event__table--full cricket-event__table--grid">
+                      <thead>
+                        <tr className="cricket-event__table-row cricket-event__table-row--head">
+                          <th>S.No.</th>
+                          <th>Runners</th>
+                          <th>Input</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="cricket-event__table-row">
+                          <td>1</td>
+                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
+                          <td>
+                            <input
+                              type="text"
+                              className="cricket-event__input"
+                              placeholder="value"
+                            />
+                          </td>
+                          <td>
+                            <div className="cricket-event__manual-actions">
+                              <button
+                                type="button"
+                                className="cricket-event__save-btn"
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                className="cricket-event__cancel-btn"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr className="cricket-event__table-row">
+                          <td>1</td>
+                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
+                          <td>
+                            <input
+                              type="text"
+                              className="cricket-event__input"
+                              placeholder="value"
+                            />
+                          </td>
+                          <td>
+                            <div className="cricket-event__manual-actions">
+                              <button
+                                type="button"
+                                className="cricket-event__save-btn"
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                className="cricket-event__cancel-btn"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr className="cricket-event__table-row">
+                          <td>1</td>
+                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
+                          <td>
+                            <input
+                              type="text"
+                              className="cricket-event__input"
+                              placeholder="value"
+                            />
+                          </td>
+                          <td>
+                            <div className="cricket-event__manual-actions">
+                              <button
+                                type="button"
+                                className="cricket-event__save-btn"
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                className="cricket-event__cancel-btn"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr className="cricket-event__table-row">
+                          <td>1</td>
+                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
+                          <td>
+                            <input
+                              type="text"
+                              className="cricket-event__input"
+                              placeholder="value"
+                            />
+                          </td>
+                          <td>
+                            <div className="cricket-event__manual-actions">
+                              <button
+                                type="button"
+                                className="cricket-event__save-btn"
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                className="cricket-event__cancel-btn"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="cricket-event__manual-hint">
+                    Manual result entry will be enabled once this workflow is fully configured.
+                  </p>
+                </div>
+              </section>
             </>
           )}
         </section>

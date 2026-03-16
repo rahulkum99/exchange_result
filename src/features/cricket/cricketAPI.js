@@ -46,6 +46,18 @@ export const cricketApi = createApi({
         body: { eventId },
       }),
     }),
+    settleBookmakerFancy: builder.mutation({
+      query: ({ marketType, eventId, marketId, winnerSelectionId }) => ({
+        url: '/cricket/settle/bookmaker-fancy',
+        method: 'POST',
+        body: {
+          marketType,
+          eventId,
+          marketId,
+          winnerSelectionId,
+        },
+      }),
+    }),
     settleMatchOdds: builder.mutation({
       query: ({
         marketType,
@@ -67,6 +79,18 @@ export const cricketApi = createApi({
         },
       }),
     }),
+    settleTosMarket: builder.mutation({
+      query: ({ marketType, eventId, marketId, winnerSelectionId }) => ({
+        url: '/cricket/settle/tos-market',
+        method: 'POST',
+        body: {
+          marketType,
+          eventId,
+          marketId,
+          winnerSelectionId,
+        },
+      }),
+    }),
   }),
 });
 
@@ -77,5 +101,7 @@ export const {
   useGetMissingFancyMutation,
   useGetUnsettledBetsMutation,
   useSettleMatchOddsMutation,
+  useSettleTosMarketMutation,
+  useSettleBookmakerFancyMutation,
 } = cricketApi;
 

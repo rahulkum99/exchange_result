@@ -215,6 +215,29 @@
   padding: 0.5rem 0.75rem 0.75rem;
 }
 
+.cricket-event__manual-result {
+  padding: 0.5rem 0.75rem 1.25rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.cricket-event__manual-header {
+  margin-bottom: 0.5rem;
+}
+
+.cricket-event__manual-title {
+  margin: 0 0 0.15rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.cricket-event__manual-subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
 .cricket-event__market-card {
   border-radius: 0.5rem;
   border: 1px solid #e5e7eb;
@@ -223,6 +246,11 @@
   overflow: hidden;
   display: flex;
   justify-content: space-between;
+}
+
+.cricket-event__market-card--full {
+  width: 100%;
+  flex-direction: column;
 }
 
 .cricket-event__market-header {
@@ -246,6 +274,21 @@
   width: 40%;
 }
 
+.cricket-event__table--full {
+  width: 100%;
+}
+
+.cricket-event__table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.cricket-event__table--grid {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
 .cricket-event__table-row {
   display: grid;
   grid-template-columns: 0.6fr 2fr 1fr;
@@ -253,6 +296,34 @@
   align-items: center;
   padding: 0.4rem 0.6rem;
   font-size: 0.8rem;
+}
+
+.cricket-event__table--grid .cricket-event__table-row {
+  display: table-row;
+}
+
+.cricket-event__table--grid th,
+.cricket-event__table--grid td {
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.cricket-event__table--grid thead tr {
+  background-color: #111827;
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+.cricket-event__table--grid tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.cricket-event__manual-actions {
+  display: inline-flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
 }
 
 .cricket-event__table-row--head {
@@ -344,6 +415,15 @@
   max-width: 100%;
 }
 
+.cricket-event__input {
+  width: 100%;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
 .cricket-event__save-btn {
   padding: 0.35rem 0.9rem;
   border-radius: 0.25rem;
@@ -357,6 +437,39 @@
 
 .cricket-event__save-btn:hover {
   background-color: #16a34a;
+}
+
+.cricket-event__save-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cricket-event__cancel-btn {
+  padding: 0.35rem 0.9rem;
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cricket-event__cancel-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.cricket-event__cancel-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cricket-event__manual-hint {
+  margin: 0.4rem 0 0.2rem;
+  padding: 0.4rem 0.6rem 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  border-top: 1px dashed #e5e7eb;
 }
 
 .cricket-event__info-btn {
@@ -485,6 +598,10 @@
   }
   .cricket-event__table {
     width: 100%;
+  }
+
+  .cricket-event__manual-result {
+    padding-inline: 0.75rem;
   }
 }
 
