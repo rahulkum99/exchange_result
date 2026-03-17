@@ -91,6 +91,31 @@ export const cricketApi = createApi({
         },
       }),
     }),
+    settleFancy: builder.mutation({
+      query: ({ eventId, marketId, selectionId, finalValue }) => ({
+        url: '/cricket/settle/fancy',
+        method: 'POST',
+        body: {
+          eventId,
+          marketId,
+          selectionId,
+          finalValue,
+        },
+      }),
+    }),
+    cancelMarket: builder.mutation({
+      query: ({ marketType, eventId, marketId, selectionId, reason }) => ({
+        url: '/cancel/market',
+        method: 'POST',
+        body: {
+          marketType,
+          eventId,
+          marketId,
+          selectionId,
+          reason,
+        },
+      }),
+    }),
   }),
 });
 
@@ -103,5 +128,7 @@ export const {
   useSettleMatchOddsMutation,
   useSettleTosMarketMutation,
   useSettleBookmakerFancyMutation,
+  useSettleFancyMutation,
+  useCancelMarketMutation,
 } = cricketApi;
 

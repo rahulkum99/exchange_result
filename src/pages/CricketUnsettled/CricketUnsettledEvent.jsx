@@ -9,6 +9,8 @@ import {
   useSettleMatchOddsMutation,
   useSettleTosMarketMutation,
   useSettleBookmakerFancyMutation,
+  useSettleFancyMutation,
+  useCancelMarketMutation,
 } from '../../features/cricket/cricketAPI';
 
 function CricketUnsettledEvent() {
@@ -17,6 +19,7 @@ function CricketUnsettledEvent() {
   const markets = data?.data || [];
 
   const [selectedByMarket, setSelectedByMarket] = React.useState({});
+  const [manualValues, setManualValues] = React.useState({});
   const [exchangeReportModal, setExchangeReportModal] = React.useState(null);
   const [savingMarketId, setSavingMarketId] = React.useState(null);
   const [openEvent, setOpenEvent] = React.useState(true);
@@ -26,6 +29,8 @@ function CricketUnsettledEvent() {
   const [settleMatchOdds] = useSettleMatchOddsMutation();
   const [settleTosMarket] = useSettleTosMarketMutation();
   const [settleBookmakerFancy] = useSettleBookmakerFancyMutation();
+  const [settleFancy] = useSettleFancyMutation();
+  const [cancelMarket] = useCancelMarketMutation();
 
   const visibleMarkets = React.useMemo(
     () => (showUnsettledOnly ? markets.filter((m) => m.settled === false) : markets),
@@ -39,6 +44,19 @@ function CricketUnsettledEvent() {
       ),
     [visibleMarkets],
   );
+
+  const manualEntryRows = React.useMemo(() => {
+    const manualMarkets = markets.filter((m) => ['Normal', 'oddeven'].includes(m.marketName));
+    return manualMarkets.flatMap((m) =>
+      (m.selections || []).map((sel) => ({
+        marketId: m.marketId,
+        marketName: m.marketName,
+        selectionId: sel.selectionId,
+        selectionName: sel.selectionName,
+        issettle: Boolean(sel.issettle),
+      })),
+    );
+  }, [markets]);
 
   const eventName = markets[0]?.eventName || '';
 
@@ -66,6 +84,68 @@ function CricketUnsettledEvent() {
       ...prev,
       [marketId]: selectionId,
     }));
+  };
+
+  const handleManualValueChange = (selectionId, value) => {
+    setManualValues((prev) => ({ ...prev, [selectionId]: value }));
+  };
+
+  const handleManualCancel = async (row) => {
+    try {
+      const result = await cancelMarket({
+        marketType: 'fancy',
+        eventId,
+        marketId: row.marketId,
+        selectionId: row.selectionId,
+        reason: 'section cancelled',
+      }).unwrap();
+
+      const message =
+        result?.data?.message ??
+        (result?.success ? 'Selection cancelled successfully.' : 'Cancel failed.');
+      // eslint-disable-next-line no-alert
+      alert(message);
+
+      setManualValues((prev) => ({ ...prev, [row.selectionId]: '' }));
+      await refetch();
+    } catch (error) {
+      // eslint-disable-next-line no-alert
+      alert('Failed to cancel selection. Please try again.');
+      // eslint-disable-next-line no-console
+      console.error('Cancel selection error', error);
+    }
+  };
+
+  const handleManualSave = async (row) => {
+    const rawValue = manualValues[row.selectionId];
+    const finalValue = Number(rawValue);
+
+    if (!Number.isFinite(finalValue)) {
+      // eslint-disable-next-line no-alert
+      alert('Please enter a valid numeric value.');
+      return;
+    }
+
+    try {
+      const result = await settleFancy({
+        eventId,
+        marketId: row.marketId,
+        selectionId: row.selectionId,
+        finalValue,
+      }).unwrap();
+
+      const message =
+        result?.data?.message ??
+        (result?.success ? 'Fancy market settled successfully.' : 'Settlement failed.');
+      // eslint-disable-next-line no-alert
+      alert(message);
+      await refetch();
+    } catch (error) {
+      // eslint-disable-next-line no-alert
+      alert('Failed to settle fancy. Please try again.');
+      // eslint-disable-next-line no-console
+      console.error('Settle fancy error', error);
+    }
   };
 
   const handleSave = async (market) => {
@@ -381,114 +461,55 @@ function CricketUnsettledEvent() {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="cricket-event__table-row">
-                          <td>1</td>
-                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="cricket-event__input"
-                              placeholder="value"
-                            />
-                          </td>
-                          <td>
-                            <div className="cricket-event__manual-actions">
-                              <button
-                                type="button"
-                                className="cricket-event__save-btn"
-                              >
-                                Save
-                              </button>
-                              <button
-                                type="button"
-                                className="cricket-event__cancel-btn"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr className="cricket-event__table-row">
-                          <td>1</td>
-                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="cricket-event__input"
-                              placeholder="value"
-                            />
-                          </td>
-                          <td>
-                            <div className="cricket-event__manual-actions">
-                              <button
-                                type="button"
-                                className="cricket-event__save-btn"
-                              >
-                                Save
-                              </button>
-                              <button
-                                type="button"
-                                className="cricket-event__cancel-btn"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr className="cricket-event__table-row">
-                          <td>1</td>
-                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="cricket-event__input"
-                              placeholder="value"
-                            />
-                          </td>
-                          <td>
-                            <div className="cricket-event__manual-actions">
-                              <button
-                                type="button"
-                                className="cricket-event__save-btn"
-                              >
-                                Save
-                              </button>
-                              <button
-                                type="button"
-                                className="cricket-event__cancel-btn"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr className="cricket-event__table-row">
-                          <td>1</td>
-                          <td>1st wkt lost to AR balls(AR vs LRB)adv</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="cricket-event__input"
-                              placeholder="value"
-                            />
-                          </td>
-                          <td>
-                            <div className="cricket-event__manual-actions">
-                              <button
-                                type="button"
-                                className="cricket-event__save-btn"
-                              >
-                                Save
-                              </button>
-                              <button
-                                type="button"
-                                className="cricket-event__cancel-btn"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
+                        {manualEntryRows.length === 0 ? (
+                          <tr className="cricket-event__table-row">
+                            <td colSpan={4} className="cricket-event__empty">
+                              No Normal / Odd-Even selections found for manual entry.
+                            </td>
+                          </tr>
+                        ) : (
+                          manualEntryRows.map((row, idx) => (
+                            <tr
+                              key={`${row.marketId}-${row.selectionId}`}
+                              className="cricket-event__table-row"
+                            >
+                              <td>{idx + 1}</td>
+                              <td>{row.selectionName}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  className="cricket-event__input"
+                                  placeholder="value"
+                                  value={manualValues[row.selectionId] ?? ''}
+                                  disabled={row.issettle}
+                                  onChange={(e) =>
+                                    handleManualValueChange(row.selectionId, e.target.value)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <div className="cricket-event__manual-actions">
+                                  <button
+                                    type="button"
+                                    className="cricket-event__save-btn"
+                                    onClick={() => handleManualSave(row)}
+                                    disabled={row.issettle}
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="cricket-event__cancel-btn"
+                                    onClick={() => handleManualCancel(row)}
+                                    disabled={row.issettle}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
