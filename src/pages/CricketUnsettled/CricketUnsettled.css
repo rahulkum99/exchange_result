@@ -218,7 +218,7 @@
 .cricket-event__manual-result {
   padding: 0.5rem 0.75rem 1.25rem;
   border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
+  background: pink;
 }
 
 .cricket-event__manual-header {
@@ -316,8 +316,12 @@
   font-weight: 600;
 }
 
+.cricket-event__table--grid tbody tr {
+  background-color: #fce7f3;
+}
+
 .cricket-event__table--grid tbody tr:nth-child(even) {
-  background-color: #f9fafb;
+  background-color: #fbcfe8;
 }
 
 .cricket-event__manual-actions {
@@ -332,8 +336,12 @@
   font-weight: 600;
 }
 
+.cricket-event__table-row:not(.cricket-event__table-row--head) {
+  background-color: #fce7f3;
+}
+
 .cricket-event__table-row:not(.cricket-event__table-row--head):nth-child(even) {
-  background-color: #f9fafb;
+  background-color: #fbcfe8;
 }
 
 .cricket-event__auto-settle {
@@ -416,7 +424,7 @@
 }
 
 .cricket-event__input {
-  width: 100%;
+  width: 135px;
   padding: 0.3rem 0.4rem;
   border-radius: 0.25rem;
   border: 1px solid #d1d5db;

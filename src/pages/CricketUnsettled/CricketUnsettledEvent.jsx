@@ -47,15 +47,18 @@ function CricketUnsettledEvent() {
 
   const manualEntryRows = React.useMemo(() => {
     const manualMarkets = markets.filter((m) => ['Normal', 'oddeven'].includes(m.marketName));
-    return manualMarkets.flatMap((m) =>
-      (m.selections || []).map((sel) => ({
+    return manualMarkets.flatMap((m) => {
+      const fromSection = Array.isArray(m.section) && m.section.length > 0;
+      const rows = fromSection ? m.section : m.selections || [];
+
+      return rows.map((row) => ({
         marketId: m.marketId,
         marketName: m.marketName,
-        selectionId: sel.selectionId,
-        selectionName: sel.selectionName,
-        issettle: Boolean(sel.issettle),
-      })),
-    );
+        selectionId: fromSection ? row.sid : row.selectionId,
+        selectionName: fromSection ? row.nat : row.selectionName,
+        issettle: fromSection ? false : Boolean(row.issettle),
+      }));
+    });
   }, [markets]);
 
   const eventName = markets[0]?.eventName || '';
@@ -471,7 +474,7 @@ function CricketUnsettledEvent() {
                           manualEntryRows.map((row, idx) => (
                             <tr
                               key={`${row.marketId}-${row.selectionId}`}
-                              className="cricket-event__table-row"
+                              className="cricket-event__table-row mb-2"
                             >
                               <td>{idx + 1}</td>
                               <td>{row.selectionName}</td>
