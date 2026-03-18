@@ -417,7 +417,7 @@ function CricketUnsettledEvent() {
                               >
                                 Settled
                               </button>
-                              {market.exchange_report?.length > 0 && (
+                              {/* {market.exchange_report?.length > 0 && (
                                 <button
                                   type="button"
                                   className="cricket-event__info-btn"
@@ -425,7 +425,7 @@ function CricketUnsettledEvent() {
                                 >
                                   i
                                 </button>
-                              )}
+                              )} */}
                             </>
                           ) : (
                             <button
