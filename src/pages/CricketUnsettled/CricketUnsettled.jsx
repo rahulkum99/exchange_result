@@ -7,7 +7,7 @@ import { useGetCricketUnsettledSummaryQuery } from '../../features/cricket/crick
 const DEFAULT_LIMIT = 20;
 
 function CricketUnsettled() {
-  const [openEventFilter, setOpenEventFilter] = React.useState(undefined);
+  const [openEventFilter, setOpenEventFilter] = React.useState(true);
   const [page, setPage] = React.useState(1);
   const [limit] = React.useState(DEFAULT_LIMIT);
 

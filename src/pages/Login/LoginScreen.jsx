@@ -11,7 +11,7 @@ import {
 
 function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [username, setUsername] = useState('superadmin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [login, { isLoading }] = useLoginMutation();

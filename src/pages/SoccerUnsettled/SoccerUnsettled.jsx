@@ -7,7 +7,7 @@ import { useGetSoccerUnsettledSummaryQuery } from '../../features/soccer/soccerA
 const DEFAULT_LIMIT = 20;
 
 function SoccerUnsettled() {
-  const [openEventFilter, setOpenEventFilter] = React.useState(undefined);
+  const [openEventFilter, setOpenEventFilter] = React.useState(true);
   const [page, setPage] = React.useState(1);
   const [limit] = React.useState(DEFAULT_LIMIT);
 
