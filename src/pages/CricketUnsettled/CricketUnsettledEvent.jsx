@@ -20,6 +20,8 @@ function CricketUnsettledEvent() {
 
   const [selectedByMarket, setSelectedByMarket] = React.useState({});
   const [manualValues, setManualValues] = React.useState({});
+  const [publishByMarketId, setPublishByMarketId] = React.useState({});
+  const [publishBySelectionId, setPublishBySelectionId] = React.useState({});
   const [exchangeReportModal, setExchangeReportModal] = React.useState(null);
   const [savingMarketId, setSavingMarketId] = React.useState(null);
   const [openEvent, setOpenEvent] = React.useState(true);
@@ -48,15 +50,47 @@ function CricketUnsettledEvent() {
   const manualEntryRows = React.useMemo(() => {
     const manualMarkets = markets.filter((m) => ['Normal', 'oddeven'].includes(m.marketName));
     return manualMarkets.flatMap((m) => {
-      const fromSection = Array.isArray(m.section) && m.section.length > 0;
-      const rows = fromSection ? m.section : m.selections || [];
+      const isOddEven = m.marketName === 'oddeven';
 
+      // For oddeven markets with no selections/section, synthesise Odd & Even rows
+      const fromSection = Array.isArray(m.section) && m.section.length > 0;
+      const hasSelections = Array.isArray(m.selections) && m.selections.length > 0;
+
+      if (isOddEven && !fromSection && !hasSelections) {
+        return [
+          {
+            marketId: m.marketId,
+            marketName: m.marketName,
+            selectionId: `${m.marketId}_odd`,
+            selectionName: 'Odd',
+            issettle: Boolean(m.settled),
+            published: Boolean(m.published),
+            finalValue: m.finalValue ?? '',
+            isOddEven: true,
+          },
+          {
+            marketId: m.marketId,
+            marketName: m.marketName,
+            selectionId: `${m.marketId}_even`,
+            selectionName: 'Even',
+            issettle: Boolean(m.settled),
+            published: Boolean(m.published),
+            finalValue: m.finalValue ?? '',
+            isOddEven: true,
+          },
+        ];
+      }
+
+      const rows = fromSection ? m.section : m.selections || [];
       return rows.map((row) => ({
         marketId: m.marketId,
         marketName: m.marketName,
-        selectionId: fromSection ? row.sid : row.selectionId,
+        selectionId: fromSection ? (row.selectionId ?? row.sid) : row.selectionId,
         selectionName: fromSection ? row.nat : row.selectionName,
-        issettle: fromSection ? false : Boolean(row.issettle),
+        issettle: Boolean(row.issettle),
+        published: Boolean(fromSection ? row.published : m.published),
+        finalValue: fromSection ? (row.finalValue ?? '') : (m.finalValue ?? ''),
+        isOddEven,
       }));
     });
   }, [markets]);
@@ -121,9 +155,11 @@ function CricketUnsettledEvent() {
 
   const handleManualSave = async (row) => {
     const rawValue = manualValues[row.selectionId];
-    const finalValue = Number(rawValue);
+    const finalValueStr = String(rawValue ?? '').trim();
+    const finalValueNum = Number(finalValueStr);
+    const publish = Boolean(publishBySelectionId[row.selectionId]);
 
-    if (!Number.isFinite(finalValue)) {
+    if (!Number.isFinite(finalValueNum)) {
       // eslint-disable-next-line no-alert
       alert('Please enter a valid numeric value.');
       return;
@@ -134,7 +170,8 @@ function CricketUnsettledEvent() {
         eventId,
         marketId: row.marketId,
         selectionId: row.selectionId,
-        finalValue,
+        finalValue: finalValueStr,
+        publish,
       }).unwrap();
 
       const message =
@@ -142,6 +179,7 @@ function CricketUnsettledEvent() {
         (result?.success ? 'Fancy market settled successfully.' : 'Settlement failed.');
       // eslint-disable-next-line no-alert
       alert(message);
+      setPublishBySelectionId((prev) => ({ ...prev, [row.selectionId]: false }));
       await refetch();
     } catch (error) {
       // eslint-disable-next-line no-alert
@@ -156,6 +194,7 @@ function CricketUnsettledEvent() {
       selectedByMarket[market.marketId] ||
       market.section?.[0]?.sid ||
       market.selections?.[0]?.selectionId;
+    const publish = Boolean(publishByMarketId[market.marketId]);
 
     if (!winnerSelectionId) return;
 
@@ -171,17 +210,17 @@ function CricketUnsettledEvent() {
 
       if (market.marketName === 'fancy1') {
         result = await settleTosMarket({
-          marketType: 'tos_market',
           eventId,
           marketId: market.marketId,
           winnerSelectionId,
+          publish,
         }).unwrap();
       } else if (market.marketName === 'Bookmaker') {
         result = await settleBookmakerFancy({
-          marketType: 'bookmakers_fancy',
           eventId,
           marketId: market.marketId,
           winnerSelectionId,
+          publish,
         }).unwrap();
       } else {
         result = await settleMatchOdds({
@@ -191,6 +230,7 @@ function CricketUnsettledEvent() {
           winnerSelectionId,
           winnerSelectionName,
           marketName: market.marketName,
+          publish,
         }).unwrap();
       }
 
@@ -203,6 +243,7 @@ function CricketUnsettledEvent() {
           : 'Settlement failed.');
       // eslint-disable-next-line no-alert
       alert(message);
+      setPublishByMarketId((prev) => ({ ...prev, [market.marketId]: false }));
       await refetch();
     } catch (error) {
       // eslint-disable-next-line no-alert
@@ -380,7 +421,7 @@ function CricketUnsettledEvent() {
                         <span>
                           <select
                             className="cricket-event__select"
-                            disabled={market.settled}
+                            disabled={Boolean(market.published)}
                             value={
                               selectedByMarket[market.marketId] ||
                               market.section?.[0]?.sid ||
@@ -408,35 +449,40 @@ function CricketUnsettledEvent() {
                           </select>
                         </span>
                         <span>
-                          {market.settled ? (
-                            <>
-                              <button
-                                type="button"
-                                className="cricket-event__save-btn"
-                                disabled
-                              >
-                                Settled
-                              </button>
-                              {/* {market.exchange_report?.length > 0 && (
-                                <button
-                                  type="button"
-                                  className="cricket-event__info-btn"
-                                  onClick={() => handleShowExchangeReport(market)}
-                                >
-                                  i
-                                </button>
-                              )} */}
-                            </>
-                          ) : (
-                            <button
-                              type="button"
-                              className="cricket-event__save-btn"
-                              onClick={() => handleSave(market)}
-                              disabled={savingMarketId === market.marketId}
-                            >
-                              {savingMarketId === market.marketId ? 'Saving...' : 'Save'}
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="cricket-event__save-btn"
+                            onClick={() => handleSave(market)}
+                            disabled={Boolean(market.published) || savingMarketId === market.marketId}
+                          >
+                            {savingMarketId === market.marketId
+                              ? publishByMarketId[market.marketId]
+                                ? 'Publishing...'
+                                : market.settled
+                                  ? 'Editing...'
+                                  : 'Saving...'
+                              : Boolean(market.published)
+                                ? 'Published'
+                                : publishByMarketId[market.marketId]
+                                  ? 'Publish'
+                                  : market.settled
+                                    ? 'Edit'
+                                    : 'Save'}
+                          </button>
+                          <input
+                            type="checkbox"
+                            className="cricket-event__check-box"
+                            disabled={Boolean(market.published)}
+                            checked={Boolean(publishByMarketId[market.marketId])}
+                            onChange={(e) =>
+                              setPublishByMarketId((prev) => ({
+                                ...prev,
+                                [market.marketId]: e.target.checked,
+                              }))
+                            }
+                            aria-label="publish"
+                            title="Publish"
+                          />
                         </span>
                       </div>
                     </div>
@@ -458,6 +504,7 @@ function CricketUnsettledEvent() {
                       <thead>
                         <tr className="cricket-event__table-row cricket-event__table-row--head">
                           <th>S.No.</th>
+                          <th>Market</th>
                           <th>Runners</th>
                           <th>Input</th>
                           <th>Action</th>
@@ -466,7 +513,7 @@ function CricketUnsettledEvent() {
                       <tbody>
                         {manualEntryRows.length === 0 ? (
                           <tr className="cricket-event__table-row">
-                            <td colSpan={4} className="cricket-event__empty">
+                            <td colSpan={5} className="cricket-event__empty">
                               No Normal / Odd-Even selections found for manual entry.
                             </td>
                           </tr>
@@ -477,14 +524,19 @@ function CricketUnsettledEvent() {
                               className="cricket-event__table-row mb-2"
                             >
                               <td>{idx + 1}</td>
+                              <td>
+                                <span className={`cricket-event__market-badge cricket-event__market-badge--${row.marketName === 'oddeven' ? 'oddeven' : 'normal'}`}>
+                                  {row.marketName === 'oddeven' ? 'Odd-Even' : 'Normal'}
+                                </span>
+                              </td>
                               <td>{row.selectionName}</td>
                               <td>
                                 <input
                                   type="text"
                                   className="cricket-event__input"
                                   placeholder="value"
-                                  value={manualValues[row.selectionId] ?? ''}
-                                  disabled={row.issettle}
+                                  value={manualValues[row.selectionId] ?? row.finalValue ?? ''}
+                                  disabled={Boolean(row.published)}
                                   onChange={(e) =>
                                     handleManualValueChange(row.selectionId, e.target.value)
                                   }
@@ -496,18 +548,39 @@ function CricketUnsettledEvent() {
                                     type="button"
                                     className="cricket-event__save-btn"
                                     onClick={() => handleManualSave(row)}
-                                    disabled={row.issettle}
+                                    disabled={Boolean(row.published)}
                                   >
-                                    Save
+                                    {row.published
+                                      ? 'Published'
+                                      : publishBySelectionId[row.selectionId]
+                                        ? 'Publish'
+                                        : row.issettle
+                                          ? 'Edit'
+                                          : 'Save'}
                                   </button>
                                   <button
                                     type="button"
                                     className="cricket-event__cancel-btn"
                                     onClick={() => handleManualCancel(row)}
-                                    disabled={row.issettle}
+                                    disabled={Boolean(row.published)}
                                   >
                                     Cancel
                                   </button>
+
+                                  <input
+                                    type="checkbox"
+                                    className="cricket-event__check-box"
+                                    disabled={Boolean(row.published)}
+                                    checked={Boolean(publishBySelectionId[row.selectionId])}
+                                    onChange={(e) =>
+                                      setPublishBySelectionId((prev) => ({
+                                        ...prev,
+                                        [row.selectionId]: e.target.checked,
+                                      }))
+                                    }
+                                    aria-label="publish"
+                                    title="Publish"
+                                  />
                                 </div>
                               </td>
                             </tr>

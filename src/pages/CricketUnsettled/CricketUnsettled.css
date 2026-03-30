@@ -472,6 +472,38 @@
   cursor: not-allowed;
 }
 
+.cricket-event__check-box {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.cricket-event__check-box:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.cricket-event__market-badge {
+  display: inline-block;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.cricket-event__market-badge--normal {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.cricket-event__market-badge--oddeven {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+}
+
 .cricket-event__manual-hint {
   margin: 0.4rem 0 0.2rem;
   padding: 0.4rem 0.6rem 0.5rem;

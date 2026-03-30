@@ -47,14 +47,14 @@ export const cricketApi = createApi({
       }),
     }),
     settleBookmakerFancy: builder.mutation({
-      query: ({ marketType, eventId, marketId, winnerSelectionId }) => ({
+      query: ({ eventId, marketId, winnerSelectionId, publish }) => ({
         url: '/cricket/settle/bookmaker-fancy',
         method: 'POST',
         body: {
-          marketType,
           eventId,
           marketId,
           winnerSelectionId,
+          ...(publish ? { publish: true } : {}),
         },
       }),
     }),
@@ -66,6 +66,7 @@ export const cricketApi = createApi({
         winnerSelectionId,
         winnerSelectionName,
         marketName,
+        publish,
       }) => ({
         url: '/cricket/settle/match-odds',
         method: 'POST',
@@ -76,23 +77,24 @@ export const cricketApi = createApi({
           winnerSelectionId,
           winnerSelectionName,
           marketName,
+          ...(publish ? { publish: true } : {}),
         },
       }),
     }),
     settleTosMarket: builder.mutation({
-      query: ({ marketType, eventId, marketId, winnerSelectionId }) => ({
+      query: ({ eventId, marketId, winnerSelectionId, publish }) => ({
         url: '/cricket/settle/tos-market',
         method: 'POST',
         body: {
-          marketType,
           eventId,
           marketId,
           winnerSelectionId,
+          ...(publish ? { publish: true } : {}),
         },
       }),
     }),
     settleFancy: builder.mutation({
-      query: ({ eventId, marketId, selectionId, finalValue }) => ({
+      query: ({ eventId, marketId, selectionId, finalValue, publish }) => ({
         url: '/cricket/settle/fancy',
         method: 'POST',
         body: {
@@ -100,6 +102,7 @@ export const cricketApi = createApi({
           marketId,
           selectionId,
           finalValue,
+          ...(publish ? { publish: true } : {}),
         },
       }),
     }),

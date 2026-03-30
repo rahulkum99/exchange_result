@@ -34,22 +34,18 @@ export const soccerApi = createApi({
     }),
     settleMatchOdds: builder.mutation({
       query: ({
-        marketType,
         eventId,
         marketId,
         winnerSelectionId,
-        winnerSelectionName,
-        marketName,
+        publish,
       }) => ({
         url: '/soccer/settle/match-odds',
         method: 'POST',
         body: {
-          marketType: marketType ?? 'match_odds',
           eventId,
           marketId,
           winnerSelectionId,
-          winnerSelectionName,
-          marketName,
+          ...(publish ? { publish: true } : {}),
         },
       }),
     }),

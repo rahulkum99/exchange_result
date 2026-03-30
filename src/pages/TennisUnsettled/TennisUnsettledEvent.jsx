@@ -18,6 +18,7 @@ function TennisUnsettledEvent() {
     market.marketName || `Market ${market.marketId}`;
 
   const [selectedByMarket, setSelectedByMarket] = React.useState({});
+  const [publishByMarketId, setPublishByMarketId] = React.useState({});
   const [exchangeReportModal, setExchangeReportModal] = React.useState(null);
   const [savingMarketId, setSavingMarketId] = React.useState(null);
   const [openEvent, setOpenEvent] = React.useState(true);
@@ -39,27 +40,22 @@ function TennisUnsettledEvent() {
 
     if (!winnerSelectionId) return;
 
+    const publish = Boolean(publishByMarketId[market.marketId]);
     setSavingMarketId(market.marketId);
-    const winnerSelectionName =
-      market.section?.find((s) => s.sid === winnerSelectionId)?.nat ||
-      market.selections?.find((s) => s.selectionId === winnerSelectionId)
-        ?.selectionName ||
-      '';
 
     try {
       const result = await settleMatchOdds({
-        marketType: 'match_odds',
         eventId,
         marketId: market.marketId,
         winnerSelectionId,
-        winnerSelectionName,
-        marketName: market.marketName || 'MATCH_ODDS',
+        publish,
       }).unwrap();
 
       const message =
         result?.data?.[0]?.data?.message ??
         (result?.success ? 'Market settled successfully.' : 'Settlement failed.');
       alert(message);
+      setPublishByMarketId((prev) => ({ ...prev, [market.marketId]: false }));
       await refetch();
     } catch (error) {
       alert('Failed to settle match odds. Please try again.');
@@ -227,7 +223,7 @@ function TennisUnsettledEvent() {
                         <span>
                           <select
                             className="cricket-event__select"
-                            disabled={market.settled}
+                            disabled={Boolean(market.published)}
                             value={
                               selectedByMarket[market.marketId] ||
                               market.section?.[0]?.sid ||
@@ -255,35 +251,47 @@ function TennisUnsettledEvent() {
                           </select>
                         </span>
                         <span>
-                          {market.settled ? (
-                            <>
-                              <button
-                                type="button"
-                                className="cricket-event__save-btn"
-                                disabled
-                              >
-                                Settled
-                              </button>
-                              {market.exchange_report?.length > 0 && (
-                                <button
-                                  type="button"
-                                  className="cricket-event__info-btn"
-                                  onClick={() => handleShowExchangeReport(market)}
-                                >
-                                  i
-                                </button>
-                              )}
-                            </>
-                          ) : (
+                          <button
+                            type="button"
+                            className="cricket-event__save-btn"
+                            onClick={() => handleSave(market)}
+                            disabled={Boolean(market.published) || savingMarketId === market.marketId}
+                          >
+                            {savingMarketId === market.marketId
+                              ? publishByMarketId[market.marketId]
+                                ? 'Publishing...'
+                                : 'Saving...'
+                              : Boolean(market.published)
+                                ? 'Published'
+                                : publishByMarketId[market.marketId]
+                                  ? 'Publish'
+                                  : market.settled
+                                    ? 'Edit'
+                                    : 'Save'}
+                          </button>
+                          {market.exchange_report?.length > 0 && (
                             <button
                               type="button"
-                              className="cricket-event__save-btn"
-                              onClick={() => handleSave(market)}
-                              disabled={savingMarketId === market.marketId}
+                              className="cricket-event__info-btn"
+                              onClick={() => handleShowExchangeReport(market)}
                             >
-                              {savingMarketId === market.marketId ? 'Saving...' : 'Save'}
+                              i
                             </button>
                           )}
+                          <input
+                            type="checkbox"
+                            className="cricket-event__check-box"
+                            disabled={Boolean(market.published)}
+                            checked={Boolean(publishByMarketId[market.marketId])}
+                            onChange={(e) =>
+                              setPublishByMarketId((prev) => ({
+                                ...prev,
+                                [market.marketId]: e.target.checked,
+                              }))
+                            }
+                            aria-label="publish"
+                            title="Publish"
+                          />
                         </span>
                       </div>
                     </div>
