@@ -157,6 +157,53 @@
   font-weight: 600;
 }
 
+@keyframes cricket-in-play-blink {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(22, 101, 52, 0.55);
+  }
+  50% {
+    opacity: 0.72;
+    box-shadow: 0 0 0 4px rgba(22, 101, 52, 0.2);
+  }
+}
+
+.cricket-card__status--in-play {
+  background-color: #166534;
+  color: #ecfdf5;
+  animation: cricket-in-play-blink 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cricket-card__status--in-play {
+    animation: none;
+    opacity: 1;
+    box-shadow: none;
+  }
+}
+
+/* Upcoming — scheduled start not reached (GOING IN-PLAY) */
+.cricket-card__status--going-in-play {
+  background-color: #a16207;
+  color: #fffbeb;
+}
+
+.cricket-card__status--not-in-play {
+  background-color: #7f1d1d;
+  color: #fef2f2;
+}
+
+.cricket-card__status--pre-match {
+  background-color: #4b5563;
+  color: #f3f4f6;
+}
+
+.cricket-card__status--finished {
+  background-color: #1e3a5f;
+  color: #e0f2fe;
+}
+
 .cricket-card__match {
   padding: 0.4rem 0.75rem 0.5rem;
   font-size: 0.9rem;
@@ -169,11 +216,14 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   text-align: center;
-  background-color: #d9d29c;
+  background-color: #799002;
   width: 50%;
 }
 
 .cricket-card__segment {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 0.4rem 0.3rem;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -633,7 +683,7 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     text-align: center;
-    background-color: #d9d29c;
+    background-color: #799002;
     width: 100%;
   }
   .cricket-event__table {

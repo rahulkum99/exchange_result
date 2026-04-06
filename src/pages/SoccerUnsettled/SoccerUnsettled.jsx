@@ -103,27 +103,27 @@ function SoccerUnsettled() {
 
                       <div className="cricket-card__segments">
                         <div className="cricket-card__segment">
-                          <span className="cricket-card__segment-label">
+                          <span className="cricket-card__segment-label mx-1">
                             All
                           </span>
                           <span className="cricket-card__segment-value">
-                            {allCount}
+                           ( {allCount} )
                           </span>
                         </div>
                         <div className="cricket-card__segment">
-                          <span className="cricket-card__segment-label">
+                          <span className="cricket-card__segment-label mx-1">
                             Odds
                           </span>
                           <span className="cricket-card__segment-value">
-                            {oddsCount}
+                           ( {oddsCount} )
                           </span>
                         </div>
                         <div className="cricket-card__segment">
-                          <span className="cricket-card__segment-label">
+                          <span className="cricket-card__segment-label mx-1">
                             Fancy
                           </span>
                           <span className="cricket-card__segment-value">
-                            {fancyCount}
+                           ( {fancyCount} )
                           </span>
                         </div>
                       </div>

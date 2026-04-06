@@ -29,7 +29,7 @@ const AppRoutes = () => {
       </Route>
 
       <Route element={<PrivateRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<CricketUnsettled />} />
         <Route path="/cricket/unsettled" element={<CricketUnsettled />} />
         <Route
           path="/cricket/event/:eventId"
