@@ -161,6 +161,77 @@ function Navbar() {
           </button>
         </div>
       </aside>
+
+      {/* Mobile bottom nav */}
+      <nav className="bottom-nav">
+        <button
+          type="button"
+          className="bottom-nav__item"
+        >
+          <span className="bottom-nav__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <polygon points="8 5 19 12 8 19 8 5" fill="currentColor" />
+              <circle cx="5" cy="12" r="1.6" fill="currentColor" />
+            </svg>
+          </span>
+          <span className="bottom-nav__label">Open Bets</span>
+        </button>
+
+        <button
+          type="button"
+          className="bottom-nav__item"
+        >
+          <span className="bottom-nav__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M12 7v5l3 2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="bottom-nav__label">Closed Bet</span>
+        </button>
+
+        <Link
+          to="/"
+          className="bottom-nav__item bottom-nav__item--home"
+        >
+          <span className="bottom-nav__icon bottom-nav__icon--home">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="currentColor" />
+              <path d="M9.2 15.5V11h5.6v4.5" fill="none" stroke="#facc15" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M8.5 11.2 12 8.5l3.5 2.7" fill="none" stroke="#facc15" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="bottom-nav__label">Home</span>
+        </Link>
+
+        <button
+          type="button"
+          className="bottom-nav__item"
+        >
+          <span className="bottom-nav__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M9 9h6v6H9z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="bottom-nav__label">Cancel Bets</span>
+        </button>
+
+        <button
+          type="button"
+          className="bottom-nav__item"
+          onClick={handleLogout}
+        >
+          <span className="bottom-nav__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <polyline points="14 16 18 12 14 8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="18" y1="12" x2="9" y2="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="bottom-nav__label">Logout</span>
+        </button>
+      </nav>
     </>
   );
 }

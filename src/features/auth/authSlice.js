@@ -2,6 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const ACCESS_TOKEN_KEY = 'access_token';
+const ACCESS_TOKEN_EXPIRES_AT_KEY = 'access_token_expires_at';
+const ACCESS_TOKEN_VALIDITY_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 export const getStoredRefreshToken = () => {
   try {
@@ -13,7 +15,20 @@ export const getStoredRefreshToken = () => {
 
 export const getStoredAccessToken = () => {
   try {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const expiresAt = Number(localStorage.getItem(ACCESS_TOKEN_EXPIRES_AT_KEY));
+
+    if (!token) {
+      return null;
+    }
+
+    if (!Number.isFinite(expiresAt) || Date.now() >= expiresAt) {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(ACCESS_TOKEN_EXPIRES_AT_KEY);
+      return null;
+    }
+
+    return token;
   } catch {
     return null;
   }
@@ -74,6 +89,10 @@ export const storeAccessToken = (token) => {
   try {
     if (token) {
       localStorage.setItem(ACCESS_TOKEN_KEY, token);
+      localStorage.setItem(
+        ACCESS_TOKEN_EXPIRES_AT_KEY,
+        String(Date.now() + ACCESS_TOKEN_VALIDITY_MS),
+      );
     }
   } catch {
     // ignore storage errors
@@ -91,6 +110,7 @@ export const clearRefreshToken = () => {
 export const clearAccessToken = () => {
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_EXPIRES_AT_KEY);
   } catch {
     // ignore storage errors
   }

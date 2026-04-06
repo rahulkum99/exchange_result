@@ -216,6 +216,71 @@
   transform: translateY(0);
 }
 
+/* ─── Bottom mobile nav ───────────────────────────────────────── */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #d49b00;
+  display: none;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 0.35rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.18);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.35);
+  z-index: 55;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.bottom-nav__item {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #111827;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.bottom-nav__item--home {
+  position: relative;
+}
+
+.bottom-nav__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1px;
+}
+
+.bottom-nav__icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.bottom-nav__icon--home svg {
+  width: 30px;
+  height: 30px;
+}
+
+.bottom-nav__label {
+  line-height: 1.1;
+}
+
+.bottom-nav__item:active {
+  transform: translateY(1px);
+}
+
 /* ─── Sidebar overlay ────────────────────────────────────────── */
 
 .sidebar-overlay {
@@ -527,6 +592,10 @@
 
   .navbar__title {
     font-size: 0.88rem;
+  }
+
+  .bottom-nav {
+    display: flex;
   }
 }
 
